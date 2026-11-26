@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="es-AR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Higiene y Seguridad — Transporte Virgen del Valle</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tipografía Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Iconos Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        pastel: {
+                            cream: '#FDFBF7',
+                            sand: '#F6F1E7',
+                            sage: '#DCECE3',
+                            sageDeep: '#2F6F55',
+                            sky: '#E2EEFA',
+                            skyDeep: '#2B5B84',
+                            lavender: '#ECE8FA',
+                            lavenderDeep: '#4D3F8A',
+                            peach: '#FCE8DC',
+                            peachDeep: '#9A4A24',
+                            ink: '#1E293B',
+                            muted: '#526071',
+                        },
+                        navy: {
+                            950: '#E9EFF6',
+                            900: '#DDE6F2',
+                            800: '#FFFFFF',
+                            700: '#E2EBF5',
+                        },
+                        ambervial: {
+                            500: '#F3C68F',
+                            400: '#F7D6AE',
+                            600: '#B86B28',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        /* Animación sutil para destacar controles en estado NO AL DÍA / VENCIDO / ROJO */
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.28); }
+            50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+        }
+
+        .control-card-alert {
+            background-color: #FEE2E2;
+            border-color: #DC2626;
+            animation: alertPulse 2.6s infinite;
+        }
+
+        .control-card-ok {
+            background-color: #FFFFFF;
+            border-color: #CFE3D8;
+        }
+
+        .control-card-ok:hover {
+            border-color: #3D8B6E;
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #FFFFFF !important; color: #1E293B !important; }
+            .control-card-alert {
+                animation: none !important;
+                background-color: #FEE2E2 !important;
+                border: 2px solid #DC2626 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .control-card-ok {
+                border: 1px solid #CBD5E1 !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-pastel-cream text-pastel-ink antialiased selection:bg-red-600 selection:text-white">
+
+    <!-- ===================================================================== -->
+    <!-- ENCABEZADO SUPERIOR CON CAMBIO DE MODO (CLIENTE / CONSULTORA)         -->
+    <!-- ===================================================================== -->
+    <header class="sticky top-0 z-30 bg-pastel-sand/95 backdrop-blur-md border-b border-slate-200/90 text-pastel-ink no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center justify-between gap-3 py-3.5">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-pastel-peach text-pastel-peachDeep border border-amber-300/80 flex items-center justify-center text-xl font-extrabold shadow-sm">
+                        <i class="fa-solid fa-bus"></i>
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 class="font-heading font-extrabold text-base sm:text-lg tracking-tight text-pastel-ink leading-tight">
+                                Gestión de Higiene y Seguridad — Transporte Virgen del Valle
+                            </h1>
+                            <span id="mode-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-pastel-sky text-pastel-skyDeep border border-sky-300/80">
+                                Vista Cliente (Solo Lectura)
+                            </span>
+                        </div>
+                        <p class="text-xs text-pastel-muted font-medium">
+                            Lic. Macarena Schischke • Mat. CO.H.SE.CH. • Provincia del Chubut
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button id="btn-switch-mode" type="button" class="px-3.5 py-2 rounded-xl bg-pastel-lavender hover:bg-purple-100 text-pastel-lavenderDeep border border-purple-300/80 text-xs font-extrabold transition flex items-center gap-2 cursor-pointer shadow-sm">
+                        <i id="btn-switch-icon" class="fa-solid fa-lock"></i>
+                        <span id="btn-switch-label">Acceso Consultora (PIN)</span>
+                    </button>
+
+                    <button id="btn-new-control" type="button" class="hidden px-3.5 py-2 rounded-xl bg-pastel-sage hover:bg-emerald-100 text-pastel-sageDeep border border-emerald-300 text-xs font-extrabold transition items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Nuevo Control</span>
+                    </button>
+
+                    <button id="btn-reset-full-demo" type="button" class="hidden px-3 py-2 rounded-xl bg-red-100 hover:bg-red-200 border border-red-400 text-red-900 text-xs font-bold transition items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Restablecer Base</span>
+                    </button>
+
+                    <button id="btn-backup-panel" type="button" class="hidden px-3 py-2 rounded-xl bg-pastel-sky hover:bg-sky-100 border border-sky-300 text-pastel-skyDeep text-xs font-bold transition items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-database"></i>
+                        <span>Respaldo JSON</span>
+                    </button>
+
+                    <button onclick="window.print()" type="button" class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-pastel-ink text-xs font-bold transition flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-file-pdf text-red-600"></i>
+                        <span>Resumen / Imprimir</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- BANNER OPERATIVO, SALUD DE CUMPLIMIENTO Y KPIs CALCULADOS            -->
+    <!-- ===================================================================== -->
+    <section class="bg-gradient-to-br from-pastel-sand via-pastel-sky/60 to-pastel-lavender/65 text-pastel-ink pt-8 pb-12 border-b border-slate-200/90">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+                <div class="space-y-2 max-w-3xl">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-pastel-peach border border-amber-300/80 text-pastel-peachDeep text-xs font-bold tracking-wider uppercase">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>TABLERO DE SITUACIÓN NORMATIVA • TRANSPORTE DE PASAJEROS (CHUBUT)</span>
+                    </div>
+                    <h2 id="hero-heading" class="font-heading text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-pastel-ink">
+                        Situación Actual de Cumplimiento — Transporte Virgen del Valle
+                    </h2>
+                    <p id="hero-subtitle" class="text-pastel-muted text-sm sm:text-base leading-relaxed">
+                        Visualización en tiempo real del estado de controles exigidos para transporte de pasajeros en Chubut, seguridad vial y prevención laboral. Los ítems vencidos o no al día figuran en <strong class="text-red-700 underline decoration-red-500">ROJO</strong>.
+                    </p>
+                </div>
+
+                <!-- Tarjeta de Salud Global / Alerta Crítica -->
+                <div id="global-alert-banner" class="bg-red-100 border-2 border-red-600 text-red-950 rounded-2xl p-4 sm:p-5 shadow-md max-w-md w-full">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <div id="alert-icon-box" class="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 text-lg font-bold">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <p id="alert-banner-title" class="font-heading font-extrabold text-sm sm:text-base text-red-950">
+                                    Calculando situación...
+                                </p>
+                                <p id="alert-banner-desc" class="text-xs text-red-900 mt-0.5 leading-relaxed">
+                                    Verificando controles normativos.
+                                </p>
+                            </div>
+                        </div>
+                        <span id="health-score-pill" class="px-2.5 py-1 rounded-lg bg-red-600 text-white font-heading font-extrabold text-sm shrink-0">
+                            0%
+                        </span>
+                    </div>
+                    <div class="mt-3.5 w-full bg-red-200 border border-red-400 rounded-full h-2.5 overflow-hidden">
+                        <div id="health-progress-bar" class="h-full bg-red-600 transition-all duration-300" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Calculados en Vivo -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white/90 border border-sky-200 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-pastel-muted">Índice de Cumplimiento</span>
+                        <p id="kpi-compliance" class="font-heading text-3xl font-extrabold text-pastel-skyDeep mt-1">0%</p>
+                        <span id="kpi-health-label" class="text-[11px] font-semibold text-pastel-muted">Evaluando...</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-pastel-sky text-pastel-skyDeep flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                </div>
+
+                <div class="bg-red-100 border-2 border-red-600 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-red-800">No al Día / Vencidos (Rojo)</span>
+                        <p id="stat-red" class="font-heading text-3xl font-extrabold text-red-700 mt-1">0</p>
+                        <span class="text-[11px] font-bold text-red-900">Requieren acción</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-red-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                </div>
+
+                <div class="bg-pastel-sage/90 border-2 border-emerald-400 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-pastel-sageDeep">Controles Al Día</span>
+                        <p id="stat-green" class="font-heading text-3xl font-extrabold text-pastel-sageDeep mt-1">0</p>
+                        <span class="text-[11px] font-semibold text-emerald-900">Verificados vigentes</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xl shadow-sm">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white/90 border border-purple-200 rounded-2xl p-5 flex items-center justify-between shadow-sm">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-pastel-muted">Total Evaluados</span>
+                        <p id="stat-total" class="font-heading text-3xl font-extrabold text-pastel-lavenderDeep mt-1">0</p>
+                        <span id="kpi-last-update" class="text-[11px] font-semibold text-pastel-muted">Act. hoy</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-pastel-lavender text-pastel-lavenderDeep flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Desglose por Eje Normativo (Calculado Automáticamente) -->
+            <div id="category-breakdown" class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
+                <!-- Renderizado por JS -->
+            </div>
+
+            <!-- Pestañas de Navegación entre los 3 Módulos -->
+            <div class="mt-7 pt-5 border-t border-slate-300/80 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex flex-wrap items-center gap-2" role="tablist" aria-label="Módulos de gestión">
+                    <button id="tab-controles" type="button" data-module="controles" class="module-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 bg-pastel-peach text-pastel-peachDeep border border-amber-300 shadow-sm">
+                        <i class="fa-solid fa-layer-group"></i>
+                        <span>1. Tablero de Controles</span>
+                        <span id="badge-tab-controles" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white">0</span>
+                    </button>
+
+                    <button id="tab-visita" type="button" data-module="visita" class="module-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-2 bg-white/90 text-pastel-ink border border-slate-300 hover:bg-pastel-sky">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                        <span>2. Check-List Visita Mensual</span>
+                        <span id="badge-tab-visita" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white">0</span>
+                    </button>
+
+                    <button id="tab-base" type="button" data-module="base" class="module-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-2 bg-white/90 text-pastel-ink border border-slate-300 hover:bg-pastel-lavender">
+                        <i class="fa-solid fa-warehouse"></i>
+                        <span>3. Base de Transportes y Flota</span>
+                        <span id="badge-tab-base" class="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white">0</span>
+                    </button>
+                </div>
+
+                <div class="text-xs text-pastel-muted font-medium">
+                    <i class="fa-solid fa-building text-pastel-peachDeep mr-1"></i>
+                    CUIT <strong class="text-pastel-ink">30-71810060-3</strong> • NTEAR 20/11/2026: Contrato <strong class="text-pastel-ink">900415</strong> • CIIU <strong class="text-pastel-ink">711322</strong> • Est. 1: <strong class="text-pastel-ink">San lorenzo 33, (9105), Angostura, Chubut</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- PANEL DE RESPALDO / RESTAURACIÓN JSON (SOLO MODO EDITOR)              -->
+    <!-- ===================================================================== -->
+    <section id="backup-drawer" class="hidden bg-pastel-sand border-b-2 border-amber-400 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="font-heading font-extrabold text-pastel-ink text-base sm:text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-database text-pastel-peachDeep"></i>
+                        <span>Respaldo y Restauración de Datos (JSON) — Modo Consultora</span>
+                    </h3>
+                    <p class="text-xs text-pastel-muted">
+                        Exportá el estado actual para guardarlo o restaurá un respaldo previo. Los cambios también quedan guardados automáticamente en el navegador.
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button id="btn-export-json" type="button" class="px-3.5 py-2 rounded-xl bg-pastel-sky hover:bg-sky-100 text-pastel-skyDeep border border-sky-300 text-xs font-bold transition cursor-pointer">
+                        <i class="fa-solid fa-download mr-1.5"></i>Descargar JSON
+                    </button>
+                    <label class="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-pastel-ink border border-slate-300 text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-upload mr-1"></i><span>Importar JSON</span>
+                        <input id="input-import-json" type="file" accept=".json,application/json" class="hidden">
+                    </label>
+                    <button id="btn-reset-demo" type="button" class="px-3.5 py-2 rounded-xl bg-red-100 hover:bg-red-200 text-red-900 border border-red-400 text-xs font-bold transition cursor-pointer">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>Restablecer Base Inicial
+                    </button>
+                    <button id="btn-close-backup" type="button" class="px-3 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 text-xs font-bold transition cursor-pointer">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+            <div id="backup-feedback" class="hidden text-xs font-bold px-3.5 py-2 rounded-xl"></div>
+        </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- CONTENEDOR PRINCIPAL DE LOS 3 MÓDULOS                               -->
+    <!-- ===================================================================== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- MÓDULO 1: TABLERO DE CONTROLES NORMATIVOS POR TARJETAS            -->
+        <!-- ----------------------------------------------------------------- -->
+        <div id="module-controles">
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-4 sm:p-5 shadow-sm mb-8 no-print">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <!-- Filtros por estado -->
+                    <div class="flex flex-wrap items-center gap-2" id="filter-buttons">
+                        <button data-status="all" class="status-filter-btn active px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-pastel-sky text-pastel-skyDeep border border-sky-300 transition cursor-pointer ring-2 ring-offset-1 ring-sky-500">
+                            Todos (<span id="count-all">0</span>)
+                        </button>
+                        <button data-status="red" class="status-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-red-100 text-red-800 border-2 border-red-500 hover:bg-red-200 transition cursor-pointer">
+                            <i class="fa-solid fa-circle-exclamation mr-1 text-red-600"></i>No al Día / Rojo (<span id="count-red">0</span>)
+                        </button>
+                        <button data-status="green" class="status-filter-btn px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-pastel-sage text-pastel-sageDeep border border-emerald-300 hover:bg-emerald-100 transition cursor-pointer">
+                            <i class="fa-solid fa-circle-check mr-1"></i>Al Día (<span id="count-green">0</span>)
+                        </button>
+                    </div>
+
+                    <!-- Filtro por eje normativo + buscador -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <select id="scope-select" aria-label="Filtrar por eje normativo" class="rounded-xl border border-slate-300 bg-pastel-cream px-3.5 py-2 text-xs sm:text-sm font-semibold text-pastel-ink focus:outline-none focus:border-sky-500">
+                            <option value="all">Todos los Ejes Normativos</option>
+                            <option value="chubut-sat">Chubut • Transporte de Pasajeros (Ley I-140 / SAT / Digesto XXII)</option>
+                            <option value="vial-nacional">Tránsito y Pasajeros Nacional (Ley 24.449 / Dec. 779/95 / CNRT)</option>
+                            <option value="hys-srt">Higiene, Seguridad y SRT (Ley 19.587 / Dec. 351 / Ley 24.557)</option>
+                        </select>
+
+                        <div class="relative">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-sm"></i>
+                            <input id="search-input" type="text" placeholder="Buscar control, ley, observación..." class="w-full sm:w-64 rounded-xl border border-slate-300 bg-pastel-cream pl-9 pr-3.5 py-2 text-xs sm:text-sm text-pastel-ink placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grilla de Tarjetas de Control -->
+            <section id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <!-- Renderizado dinámico mediante JavaScript -->
+            </section>
+
+            <!-- Estado vacío cuando no hay coincidencias -->
+            <div id="empty-state" class="hidden bg-white border border-slate-200 rounded-2xl p-12 text-center mt-6">
+                <i class="fa-solid fa-filter-circle-xmark text-3xl text-slate-400 mb-3"></i>
+                <p class="font-heading font-bold text-pastel-ink text-lg">No hay controles que coincidan con el filtro actual</p>
+                <p class="text-sm text-pastel-muted mt-1">Probá limpiando la búsqueda o seleccionando "Todos".</p>
+                <button id="btn-clear-filters" type="button" class="mt-4 px-4 py-2 rounded-xl bg-pastel-sky text-pastel-skyDeep border border-sky-300 text-xs font-bold hover:bg-sky-100 transition cursor-pointer">
+                    Restablecer filtros
+                </button>
+            </div>
+        </div>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- MÓDULO 2: CHECK-LIST INTERACTIVO DE VISITA MENSUAL (RES. SRT 905/15) -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="module-visita" class="space-y-6">
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pastel-lavender text-pastel-lavenderDeep border border-purple-200 text-[11px] font-extrabold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <span>Separador 8 • Acta de Visita Mensual (Res. SRT N.º 905/15)</span>
+                        </span>
+                        <h2 class="font-heading text-2xl font-extrabold text-pastel-ink">
+                            Check-List de Visita Mensual — Recorrido y Auditoría Técnica
+                        </h2>
+                        <p class="text-xs sm:text-sm text-pastel-muted mt-1">
+                            Verificación integral de Base Operativa San Lorenzo Casa 33 (Gaiman), unidades Internos 01 al 10, legajo ART/SRT, estudios ambientales, emergencias y contratistas tercerizados. Los ítems <strong>Observados</strong> o <strong>No al Día</strong> se destacan en <strong class="text-red-700">ROJO</strong>.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2 no-print">
+                        <button id="btn-save-visit" type="button" class="hidden px-4 py-2.5 rounded-xl bg-pastel-sage hover:bg-emerald-100 text-pastel-sageDeep border border-emerald-300 text-xs font-extrabold transition cursor-pointer flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Guardar Acta Mensual</span>
+                        </button>
+                        <button id="btn-export-visit-txt" type="button" class="px-4 py-2.5 rounded-xl bg-pastel-sky hover:bg-sky-100 text-pastel-skyDeep border border-sky-300 text-xs font-bold transition cursor-pointer flex items-center gap-2">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>Descargar Acta (.TXT)</span>
+                        </button>
+                        <button onclick="window.print()" type="button" class="px-4 py-2.5 rounded-xl bg-pastel-cream hover:bg-pastel-sand text-pastel-ink border border-slate-300 text-xs font-bold transition cursor-pointer flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Imprimir Acta</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Encabezado editable (en modo consultora) / legible del Acta de Visita -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mt-5">
+                    <div>
+                        <label for="visit-acta-nro" class="block text-[11px] font-bold uppercase text-pastel-muted mb-1">N° de Acta</label>
+                        <input id="visit-acta-nro" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3 py-2 text-xs sm:text-sm font-bold text-pastel-ink">
+                    </div>
+                    <div>
+                        <label for="visit-fecha" class="block text-[11px] font-bold uppercase text-pastel-muted mb-1">Fecha de Visita</label>
+                        <input id="visit-fecha" type="date" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3 py-2 text-xs sm:text-sm font-semibold text-pastel-ink">
+                    </div>
+                    <div>
+                        <label for="visit-horario" class="block text-[11px] font-bold uppercase text-pastel-muted mb-1">Horario (Inicio - Cierre)</label>
+                        <input id="visit-horario" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3 py-2 text-xs sm:text-sm font-semibold text-pastel-ink">
+                    </div>
+                    <div>
+                        <label for="visit-responsable-empresa" class="block text-[11px] font-bold uppercase text-pastel-muted mb-1">Por la Empresa (Socio / Resp.)</label>
+                        <input id="visit-responsable-empresa" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3 py-2 text-xs sm:text-sm font-semibold text-pastel-ink">
+                    </div>
+                    <div>
+                        <label for="visit-profesional" class="block text-[11px] font-bold uppercase text-pastel-muted mb-1">Servicio HyS</label>
+                        <input id="visit-profesional" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3 py-2 text-xs sm:text-sm font-semibold text-pastel-ink">
+                    </div>
+                </div>
+
+                <!-- Mini Resumen del Check-List -->
+                <div id="visit-summary-pills" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+                    <!-- Renderizado por JS -->
+                </div>
+            </div>
+
+            <!-- Tarjetas del Check-List de Visita Mensual -->
+            <div id="visit-checklist-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                <!-- Renderizado por JS -->
+            </div>
+
+            <!-- Capacitación Impartida, Recomendaciones y Seguimiento de Visita -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm space-y-5">
+                <h3 class="font-heading text-lg font-extrabold text-pastel-ink flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user text-pastel-peachDeep"></i>
+                    <span>Capacitación Impartida, Recomendaciones y Seguimiento de Observaciones</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label for="visit-cap-tema" class="block text-xs font-bold text-slate-700 mb-1">Tema / Módulo de Capacitación Dictado</label>
+                        <input id="visit-cap-tema" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3.5 py-2 text-xs sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="visit-cap-asistentes" class="block text-xs font-bold text-slate-700 mb-1">N° de Asistentes / Planilla</label>
+                        <input id="visit-cap-asistentes" type="text" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3.5 py-2 text-xs sm:text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="visit-recomendaciones" class="block text-xs font-bold text-slate-700 mb-1">Recomendaciones Técnicas y Requerimientos HyS</label>
+                        <textarea id="visit-recomendaciones" rows="3" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3.5 py-2 text-xs sm:text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="visit-seguimiento" class="block text-xs font-bold text-slate-700 mb-1">Seguimiento de Observaciones Anteriores y Próximos Vencimientos</label>
+                        <textarea id="visit-seguimiento" rows="3" class="visit-meta-input w-full rounded-xl border border-slate-300 bg-pastel-cream px-3.5 py-2 text-xs sm:text-sm"></textarea>
+                    </div>
+                </div>
+
+                <div id="visit-save-status" class="hidden text-xs font-bold px-4 py-2.5 rounded-xl bg-pastel-sage text-pastel-sageDeep border border-emerald-300"></div>
+            </div>
+        </section>
+
+        <!-- ----------------------------------------------------------------- -->
+        <!-- MÓDULO 3: APARTADO BASE DE TRANSPORTES Y FLOTA (INTERNOS 01 AL 10)  -->
+        <!-- ----------------------------------------------------------------- -->
+        <section id="module-base" class="space-y-6">
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-100">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pastel-sky text-pastel-skyDeep border border-sky-200 text-[11px] font-extrabold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>Base Operativa y Predio de Guarda • Chubut</span>
+                        </span>
+                        <h2 class="font-heading text-2xl font-extrabold text-pastel-ink">
+                            Base de Transportes Virgen del Valle S.A.S. — Infraestructura, Flota y Nómina NTEAR
+                        </h2>
+                        <p class="text-xs sm:text-sm text-pastel-muted mt-1">
+                            CUIT <strong>30-71810060-3</strong> • Acuse NTEAR Prevención ART (20/11/2026): Contrato <strong>900415</strong> • CIIU Rev2 <strong>711322</strong> • Est. 1: <strong>San lorenzo 33, (9105), Angostura, Chubut</strong> (carpeta previa: San Lorenzo Casa 33, C.P. 9105, Gaiman, Chubut / CIIU 492150 / Contrato 00027).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Alerta de Conciliación NTEAR 20/11/2026 vs. Documentación Previa -->
+                <div class="mt-5 rounded-2xl border-2 border-red-600 bg-red-100 p-4 sm:p-5 text-xs text-red-950 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="font-heading font-extrabold text-sm text-red-950 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-red-600"></i>
+                            <span>Conciliación Declaración Jurada NTEAR (Recibida 20/11/2026 — Res. SRT 13/2018 arts. 4 y 5 / Res. SRT 81/2019 Anexo III)</span>
+                        </span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-red-600 text-white font-extrabold text-[11px]">
+                            DUPLICADO Y DIFERENCIAS DETECTADAS
+                        </span>
+                    </div>
+                    <ul class="list-disc pl-5 space-y-1 leading-relaxed">
+                        <li><strong>Duplicado en Nómina NTEAR (11 registros / 0 expuestos):</strong> <strong>GERMAN JONATHAN SEBASTIAN</strong> (CUIL <code>20333454271</code>, CIUO <code>8323</code>, ingreso <code>07/01/2026</code>) aparece repetido 2 veces en el formulario recibido el 20/11/2026. Requiere conciliación con Prevención ART y ARCA/nómina.</li>
+                        <li><strong>Contrato ART:</strong> <code>900415</code> en el acuse NTEAR del 20/11/2026 vs. <code>00027</code> / <code>Código 00027</code> en borradores/separadores previos.</li>
+                        <li><strong>Domicilio / Localidad:</strong> <code>San lorenzo 33, (9105), Angostura, Chubut</code> (Establecimiento 1) en el acuse NTEAR vs. <code>San Lorenzo Casa 33, C.P. 9105, Gaiman, Provincia del Chubut</code> en los separadores de la carpeta técnica.</li>
+                        <li><strong>CIIU (Rev2):</strong> <code>711322</code> en el acuse NTEAR vs. <code>492150</code> en documentos previos.</li>
+                        <li><strong>Fechas de ingreso / CIUO:</strong> 11 filas en el acuse NTEAR (incluyendo a GERMAN JONATHAN SEBASTIAN duplicado, ROCHA SERGIO GUSTAVO con ingreso <code>12/01/2026</code> vs. 02/03/2026 previo, ÑANCUAN YULIANA SOLEDAD con ingreso <code>01/05/2025</code> vs. 02/03/2026 previo, y códigos CIUO <code>8323</code> y <code>5131</code>).</li>
+                    </ul>
+                </div>
+
+                <!-- Datos Operativos, Emergencias y Tercerización -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mt-5">
+                    <!-- Predio y Evacuación -->
+                    <div class="rounded-2xl border border-sky-200 bg-pastel-sky/45 p-5 space-y-3">
+                        <h3 class="font-heading font-extrabold text-pastel-ink text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-person-walking-arrow-right text-pastel-skyDeep"></i>
+                            <span>Predio, Vías de Escape y Punto de Encuentro</span>
+                        </h3>
+                        <p class="text-xs text-slate-700 leading-relaxed">
+                            <strong>Oficina Administrativa:</strong> mampostería tradicional, tableros con protecciones térmicas/diferenciales y calefacción. <strong>Predio de Guarda:</strong> playón descubierto para 10 unidades (Internos 01 al 10) con demarcación peatonal y vehicular.
+                        </p>
+                        <div class="p-3 rounded-xl bg-white border border-sky-200/80 text-xs text-slate-700 space-y-1.5">
+                            <p><strong class="text-pastel-ink">Punto de Encuentro Seguro (PES):</strong> vereda/espacio exterior abierto sobre calle San Lorenzo (frente al predio).</p>
+                            <p><strong class="text-pastel-ink">Roles ante Emergencia:</strong> Coordinador General (Socio Gerente / Resp. Admin.), Corte de Suministros (tablero eléctrico y llave de gas) y Evacuación/Control (planilla nominal).</p>
+                        </div>
+                    </div>
+
+                    <!-- Política de Tercerización -->
+                    <div class="rounded-2xl border border-purple-200 bg-pastel-lavender/45 p-5 space-y-3">
+                        <h3 class="font-heading font-extrabold text-pastel-ink text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-handshake text-pastel-lavenderDeep"></i>
+                            <span>Política de Tercerización (Talleres y Lavaderos)</span>
+                        </h3>
+                        <p class="text-xs text-slate-700 leading-relaxed">
+                            En la base de San Lorenzo 33 <strong>NO se realiza taller mecánico pesado, fosa, pintura ni lavado propio</strong>. El 100% del mantenimiento mecánico, electricidad, neumática y lavado integral está externalizado a proveedores habilitados.
+                        </p>
+                        <div class="p-3 rounded-xl bg-pastel-peach/75 border border-amber-300/80 text-xs text-pastel-peachDeep leading-relaxed">
+                            <strong>Requisito previo obligatorio:</strong> constancia ARCA, certificado de cobertura ART o Accidentes Personales (AP), <strong>Cláusula de No Repetición</strong> a favor de Transporte Virgen del Valle S.A.S. (CUIT 30-71810060-3) y habilitación municipal.
+                        </div>
+                    </div>
+
+                    <!-- Teléfonos Útiles y Emergencias -->
+                    <div class="rounded-2xl border border-emerald-200 bg-pastel-sage/45 p-5 space-y-3">
+                        <h3 class="font-heading font-extrabold text-pastel-ink text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-phone-volume text-red-600"></i>
+                            <span>Teléfonos de Emergencia y Contacto HyS</span>
+                        </h3>
+                        <ul class="text-xs text-slate-700 space-y-2">
+                            <li class="flex items-center justify-between border-b border-emerald-200/80 pb-1.5">
+                                <span class="font-bold text-pastel-ink">Prevención ART (24 hs)</span>
+                                <span class="font-extrabold text-red-700">0800-444-4278</span>
+                            </li>
+                            <li class="flex items-center justify-between border-b border-emerald-200/80 pb-1.5">
+                                <span>Lic. Macarena Schischke (HyS)</span>
+                                <span class="font-bold text-pastel-ink">2804976871</span>
+                            </li>
+                            <li class="flex items-center justify-between border-b border-emerald-200/80 pb-1.5">
+                                <span>Hospital Rural de Gaiman / Emerg.</span>
+                                <span class="font-bold text-pastel-ink">107 / (0280) 449-1002</span>
+                            </li>
+                            <li class="flex items-center justify-between border-b border-emerald-200/80 pb-1.5">
+                                <span>Bomberos Voluntarios de Gaiman</span>
+                                <span class="font-bold text-pastel-ink">100 / (0280) 449-1100</span>
+                            </li>
+                            <li class="flex items-center justify-between">
+                                <span>Policía / Emergencias / Defensa Civil</span>
+                                <span class="font-bold text-pastel-ink">911 / 101 / 103</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parque Móvil: Internos 01 al 10 -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                    <div>
+                        <h3 class="font-heading text-xl font-extrabold text-pastel-ink">
+                            Parque Móvil — Unidades Internos 01 al 10
+                        </h3>
+                        <p class="text-xs text-pastel-muted">
+                            Estado operativo, RTO/VTV, matafuegos, botiquines, LiNTI y observaciones registradas. Las unidades con observación o no operativas figuran en <strong class="text-red-700">ROJO</strong>.
+                        </p>
+                    </div>
+                    <div id="fleet-summary-counters" class="flex items-center gap-2 text-xs font-extrabold">
+                        <!-- Renderizado por JS -->
+                    </div>
+                </div>
+
+                <div id="fleet-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
+                    <!-- Renderizado por JS -->
+                </div>
+            </div>
+
+            <!-- Nómina NTEAR Oficial (Recibida 20/11/2026 — 11 Registros / 0 Expuestos) -->
+            <div class="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                    <div>
+                        <h3 class="font-heading text-xl font-extrabold text-pastel-ink">
+                            Nómina Declarada NTEAR (Acuse Prevención ART 20/11/2026 — 11 Registros / 0 Expuestos)
+                        </h3>
+                        <p class="text-xs text-pastel-muted">
+                            Contrato <strong>900415</strong> • CIIU Rev2 <strong>711322</strong> • CIUO <code>8323</code> (Conductores) y <code>5131</code> (Celadoras) • Res. SRT 13/2018 arts. 4 y 5 / Res. SRT 81/2019 Anexo III. El registro duplicado figura en <strong class="text-red-700">ROJO</strong>.
+                        </p>
+                    </div>
+                    <span id="staff-verified-badge" class="px-3 py-1.5 rounded-xl text-xs font-extrabold bg-red-100 text-red-900 border-2 border-red-500">
+                        11 Filas NTEAR • 1 Duplicado en Rojo
+                    </span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-pastel-sky text-pastel-skyDeep border-b border-sky-200">
+                                <th class="py-3 px-3 rounded-tl-xl font-extrabold">#</th>
+                                <th class="py-3 px-3 font-extrabold">Apellido y Nombre</th>
+                                <th class="py-3 px-3 font-extrabold">CUIL</th>
+                                <th class="py-3 px-3 font-extrabold">CIUO / Puesto</th>
+                                <th class="py-3 px-3 font-extrabold">Ingreso NTEAR</th>
+                                <th class="py-3 px-3 font-extrabold">Agentes / ESOP</th>
+                                <th class="py-3 px-3 font-extrabold">Conciliación / Estado</th>
+                                <th class="py-3 px-3 rounded-tr-xl font-extrabold text-right">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staff-table-body" class="divide-y divide-slate-200">
+                            <!-- Renderizado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL DE INICIO DE SESIÓN CONSULTORA (PIN)                            -->
+    <!-- ===================================================================== -->
+    <div id="pin-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4 no-print">
+        <div class="bg-pastel-cream rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-10 h-10 rounded-xl bg-pastel-lavender text-pastel-lavenderDeep border border-purple-200 flex items-center justify-center text-base">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-extrabold text-pastel-ink text-base">Acceso Privado — Consultora</h3>
+                        <p class="text-xs text-pastel-muted">Lic. Macarena Schischke • Edición de Controles</p>
+                    </div>
+                </div>
+                <button id="btn-close-pin" type="button" aria-label="Cerrar ventana" class="w-8 h-8 rounded-lg hover:bg-slate-200/70 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="pin-form" class="space-y-4">
+                <div>
+                    <label for="pin-input" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Ingresá tu PIN de acceso
+                    </label>
+                    <input id="pin-input" type="password" inputmode="numeric" autocomplete="off" placeholder="PIN de prueba: 2026" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-pastel-ink focus:outline-none focus:border-purple-500">
+                    <p id="pin-error" class="hidden text-xs font-bold text-red-700 mt-1.5">
+                        <i class="fa-solid fa-circle-exclamation mr-1"></i>PIN incorrecto. Verificá e intentá nuevamente.
+                    </p>
+                </div>
+
+                <div class="bg-pastel-sand border border-amber-200/80 rounded-xl p-3 text-[11px] text-pastel-muted leading-relaxed">
+                    <strong class="text-pastel-ink">Cómo cambiar el PIN en el código:</strong> buscá la constante <code class="bg-white px-1.5 py-0.5 rounded font-mono text-pastel-ink border border-slate-200">CONSULTANT_PIN</code> en el script de <code class="bg-white px-1.5 py-0.5 rounded font-mono text-pastel-ink border border-slate-200">index.html</code> y reemplazá <code class="bg-white px-1.5 py-0.5 rounded font-mono text-pastel-ink border border-slate-200">"2026"</code> por tu clave privada.
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-1">
+                    <button id="btn-cancel-pin" type="button" class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-pastel-lavender hover:bg-purple-100 text-pastel-lavenderDeep border border-purple-300 text-xs font-extrabold transition cursor-pointer">
+                        Ingresar como Consultora
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CREAR / EDITAR CONTROL (SOLO MODO EDITOR)                       -->
+    <!-- ===================================================================== -->
+    <div id="control-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/45 backdrop-blur-sm p-4 no-print">
+        <div class="bg-pastel-cream rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
+                <h3 id="control-modal-title" class="font-heading font-extrabold text-pastel-ink text-lg">
+                    Nuevo Control Normativo
+                </h3>
+                <button id="btn-close-control-modal" type="button" aria-label="Cerrar modal" class="w-8 h-8 rounded-lg hover:bg-slate-200/70 text-slate-600 flex items-center justify-center cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="control-form" class="space-y-4">
+                <input type="hidden" id="edit-control-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="field-scope" class="block text-xs font-bold text-slate-700 mb-1">Eje Normativo</label>
+                        <select id="field-scope" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-pastel-ink">
+                            <option value="chubut-sat">Chubut • Transporte de Pasajeros</option>
+                            <option value="vial-nacional">Tránsito y Pasajeros Nacional</option>
+                            <option value="hys-srt">Higiene, Seguridad y SRT</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="field-scope-label" class="block text-xs font-bold text-slate-700 mb-1">Etiqueta Corta</label>
+                        <input id="field-scope-label" type="text" required placeholder="Ej: Chubut • Ley I-Nº 140" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="field-law" class="block text-xs font-bold text-slate-700 mb-1">Normativa Aplicable</label>
+                    <input id="field-law" type="text" required placeholder="Ej: Ley I-Nº 140 / Disposición SAT N.º 44/2026" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="field-title" class="block text-xs font-bold text-slate-700 mb-1">Título del Control</label>
+                    <input id="field-title" type="text" required placeholder="Ej: Habilitación, póliza de pasajeros y RTO al día" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                </div>
+
+                <div>
+                    <label for="field-detail" class="block text-xs font-bold text-slate-700 mb-1">Descripción / Requisito Verificado</label>
+                    <textarea id="field-detail" rows="3" required placeholder="Detalle técnico del control en flota, base o taller..." class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label for="field-responsible" class="block text-xs font-bold text-slate-700 mb-1">Responsable</label>
+                        <input id="field-responsible" type="text" required placeholder="Ej: HyS / Tráfico" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="field-frequency" class="block text-xs font-bold text-slate-700 mb-1">Frecuencia</label>
+                        <input id="field-frequency" type="text" required placeholder="Ej: Mensual" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="field-due-date" class="block text-xs font-bold text-slate-700 mb-1">Vencimiento / Revisión</label>
+                        <input id="field-due-date" type="date" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="field-observation" class="block text-xs font-bold text-slate-700 mb-1">Observación para el Cliente</label>
+                    <input id="field-observation" type="text" placeholder="Ej: Pendiente actualización de obleas o constancia en base..." class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm">
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <input id="field-is-ok" type="checkbox" class="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                    <label for="field-is-ok" class="text-xs sm:text-sm font-bold text-slate-800">
+                        Marcar como AL DÍA (si se deja sin tildar, quedará en ROJO como No al Día)
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                    <button id="btn-cancel-control-modal" type="button" class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 cursor-pointer">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-pastel-sage hover:bg-emerald-100 text-pastel-sageDeep border border-emerald-300 text-xs font-extrabold transition cursor-pointer">
+                        Guardar Control
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- PIE DE PÁGINA                                                         -->
+    <!-- ===================================================================== -->
+    <footer class="bg-pastel-sand text-pastel-muted py-8 border-t border-slate-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+            <div>
+                <span class="text-pastel-ink font-bold">Lic. Macarena Schischke</span> • Higiene y Seguridad en el Trabajo • Tel: 2804976871 • schischke.macarena@gmail.com
+            </div>
+            <div>
+                <strong class="text-pastel-peachDeep">Transporte Virgen del Valle S.A.S.</strong> (CUIT 30-71810060-3) • Contrato ART 900415 • Provincia del Chubut
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- LÓGICA DE GESTIÓN, MODO EDITOR CON PIN, CÁLCULOS Y PERSISTENCIA      -->
+    <!-- ===================================================================== -->
+    <script>
+        /**
+         * PIN configurable para acceso privado de la consultora.
+         * Para cambiarlo, editá el valor de CONSULTANT_PIN (por ejemplo: "1984" o "VDV2026").
+         */
+        const CONSULTANT_PIN = "2026";
+        const STORAGE_KEY = "virgen_del_valle_gestion_hys_v4_ntear";
+        const EDITOR_SESSION_KEY = "virgen_del_valle_editor_unlocked_v4_ntear";
+
+        const SCOPE_META = {
+            "chubut-sat": {
+                title: "Chubut • Transporte de Pasajeros",
+                lawsShort: "Ley I-Nº 140 • SAT / Ley XXIV N.º 110 • Digesto XXII"
+            },
+            "vial-nacional": {
+                title: "Tránsito y Pasajeros Nacional",
+                lawsShort: "Ley 24.449 • Dec. 779/95 • CNRT"
+            },
+            "hys-srt": {
+                title: "Higiene, Seguridad y SRT",
+                lawsShort: "Res. SRT 13/2018 • Res. SRT 81/2019 • Dec. 351 • Ley 24.557"
+            }
+        };
+
+        const INITIAL_CONTROLS = [
+            {
+                id: "ntear-duplicado-german",
+                scope: "hys-srt",
+                scopeLabel: "SRT / NTEAR • Alerta Duplicado",
+                law: "Resolución SRT N.º 13/2018 (arts. 4 y 5) y Resolución SRT N.º 81/2019 (Anexo III) — Acuse Prevención ART 20/11/2026",
+                title: "Duplicado en Nómina NTEAR: GERMAN JONATHAN SEBASTIAN (CUIL 20333454271)",
+                detail: "En la Declaración Jurada NTEAR recibida por Prevención ART el 20/11/2026 (Contrato 900415, 0 expuestos), GERMAN JONATHAN SEBASTIAN (CUIL 20333454271, CIUO 8323, ingreso 07/01/2026) figura repetido 2 veces, elevando el conteo a 11 registros. Conciliar ante Prevención ART y ARCA/nómina.",
+                responsible: "Lic. Macarena Schischke (2804976871)",
+                frequency: "Inmediata / Conciliación",
+                dueDate: "2026-12-04",
+                observation: "Figura 2 veces en acuse del 20/11/2026 (total 11 filas). Verificar alta/legajo y rectificar/conciliar con Prevención ART.",
+                isUpToDate: false
+            },
+            {
+                id: "ntear-diferencias-legajos-previos",
+                scope: "hys-srt",
+                scopeLabel: "SRT / Legajo • Conciliación Datos",
+                law: "Res. SRT 13/2018 y Res. SRT 463/09 — Confronte Acuse NTEAR 20/11/2026 vs. Carpeta Técnica Previa",
+                title: "Diferencias de Contrato ART, Domicilio/Localidad, CIIU (Rev2) e Ingresos/CIUO",
+                detail: "Se detectaron diferencias entre el acuse NTEAR del 20/11/2026 y documentos internos previos: Contrato ART '900415' vs. '00027'; Domicilio Est. 1 'San lorenzo 33, (9105), Angostura, Chubut' vs. 'San Lorenzo Casa 33, C.P. 9105, Gaiman, Provincia del Chubut'; CIIU (Rev2) '711322' vs. '492150'; y fechas de ingreso/CIUO (8323 y 5131; Rocha Sergio Gustavo 12/01/2026; Ñancuan Yuliana Soledad 01/05/2025).",
+                responsible: "Lic. Macarena Schischke / Administración",
+                frequency: "Inmediata / Unificación",
+                dueDate: "2026-12-10",
+                observation: "Unificar criterios de Contrato (900415), Domicilio/Localidad, CIIU (711322) y fechas de ingreso en carpeta técnica y registros.",
+                isUpToDate: false
+            },
+            {
+                id: "chubut-ley-i-140",
+                scope: "chubut-sat",
+                scopeLabel: "Chubut • Ley I-Nº 140",
+                law: "Ley I-Nº 140 (ex Ley 3533) — Régimen del Transporte Automotor de Pasajeros (Chubut)",
+                title: "Permiso / Habilitación y Seguro Obligatorio de Pasajeros y Terceros",
+                detail: "Control de inscripción vigente ante la autoridad de aplicación de la Provincia del Chubut, pólizas vigentes de responsabilidad civil, pasajeros y equipajes, y dotación mínima exigida.",
+                responsible: "Gerencia / Legales / HyS",
+                frequency: "Mensual",
+                dueDate: "2026-12-15",
+                observation: "Verificar renovación de endosos por incorporación de unidades.",
+                isUpToDate: false
+            },
+            {
+                id: "chubut-sat-digesto-xxii",
+                scope: "chubut-sat",
+                scopeLabel: "Chubut • SAT / Digesto XXII",
+                law: "Ley XXIV N.º 110 (SAT) y Digesto Jurídico Rama XXII (Leyes XXII N.º 8 y N.º 13)",
+                title: "Parque Móvil en SAT, Comunicación BLU/Satelital y Asistencia al Viajero",
+                detail: "Verificación de altas/bajas de unidades en la Subsecretaría de Autotransporte Terrestre (SAT), operatividad de comunicación BLU o satelital en larga distancia y cobertura de asistencia al viajero en tránsito.",
+                responsible: "Tráfico / Flota / HyS",
+                frequency: "Quincenal",
+                dueDate: "2026-12-05",
+                observation: "Comprobar prueba de enlace satelital en unidades de media/larga distancia.",
+                isUpToDate: false
+            },
+            {
+                id: "vial-24449-779-cnrt",
+                scope: "vial-nacional",
+                scopeLabel: "Seguridad Vial • Ley 24.449 / CNRT",
+                law: "Ley Nacional de Tránsito N.º 24.449, Decreto 779/95 y Normativa Transporte de Pasajeros / CNRT",
+                title: "Habilitaciones de Conductores, Tiempos de Conducción y Elementos de Seguridad",
+                detail: "Control de licencias profesionales vigentes, psicofísicos, registro de conducción/descansos, matafuegos reglamentarios, botiquín, martillos rompecristales, salidas de emergencia y balizas.",
+                responsible: "Tráfico / RR.HH. / HyS",
+                frequency: "Semanal",
+                dueDate: "2026-12-01",
+                observation: "Revisar vencimiento de carga de extintores en unidades de reserva.",
+                isUpToDate: false
+            },
+            {
+                id: "hys-srt-rgrl-rar",
+                scope: "hys-srt",
+                scopeLabel: "HyS / SRT • RGRL y RAR",
+                law: "Ley 19.587, Decreto 351/79, Ley 24.557 y Resoluciones SRT N.º 463/09, 13/2018 y 81/2019",
+                title: "Declaración RGRL y NTEAR (0 Expuestos — Acuse 20/11/2026)",
+                detail: "Declaración NTEAR recibida por Prevención ART el 20/11/2026 con 0 trabajadores expuestos a agentes de riesgo (Res. SRT 81/2019 Anexo III) y justificación técnica de conducción, vibraciones, ruido y ausencia de taller propio.",
+                responsible: "Lic. Macarena Schischke",
+                frequency: "Anual / Ante cambios",
+                dueDate: "2027-03-15",
+                observation: "Acuse NTEAR 20/11/2026 archivado (Contrato 900415, 0 expuestos); pendiente conciliar duplicado y diferencias.",
+                isUpToDate: true
+            },
+            {
+                id: "hys-srt-299-886",
+                scope: "hys-srt",
+                scopeLabel: "HyS / SRT • Res. 299/11 y 886/15",
+                law: "Resoluciones SRT N.º 299/11 (EPP), N.º 886/15 (Ergonomía) y N.º 905/15",
+                title: "Entrega Firmada de EPP, Ergonomía en Puestos y Capacitación Registrada",
+                detail: "Registro individual firmado de Elementos de Protección Personal certificados (calzado antideslizante, chaleco reflectivo Clase 2, guantes, gafas UV), ergonomía en conducción/celadoras y capacitaciones mensuales.",
+                responsible: "Lic. Macarena Schischke",
+                frequency: "Mensual",
+                dueDate: "2027-01-20",
+                observation: "Planillas de entrega y programa anual de 12 módulos en legajo.",
+                isUpToDate: true
+            }
+        ];
+
+        const INITIAL_VISIT = {
+            actaNro: "011 / 2026",
+            fecha: "2026-11-26",
+            horario: "09:00 a 12:30 hs",
+            responsableEmpresa: "Representante Legal / Socio Gerente",
+            profesional: "Lic. Macarena Schischke (2804976871 / schischke.macarena@gmail.com)",
+            capacitacionTema: "Módulo 12: Actuación ante Siniestros Viales, Accidentes de Trabajo e In Itinere (PAS + Prevención ART)",
+            capacitacionAsistentes: "Nómina NTEAR 20/11/2026 (11 filas / 0 expuestos — conciliar duplicado de German Jonathan Sebastian)",
+            recomendaciones: "Conciliar duplicado de GERMAN JONATHAN SEBASTIAN (CUIL 20333454271) en NTEAR del 20/11/2026, unificar Contrato ART (900415 vs 00027), Domicilio/Localidad ('San lorenzo 33, (9105), Angostura, Chubut' vs 'San Lorenzo Casa 33, C.P. 9105, Gaiman, Chubut') y CIIU (711322 vs 492150), y ejecutar PAT Res. SRT 900/15.",
+            seguimiento: "Verificar cumplimiento de plazos de regularización RGRL (PAT: 20/12/2026; Simulacro anual: 30/01/2027) y conciliación NTEAR.",
+            items: [
+                {
+                    id: "vis-1",
+                    codigo: "ÍTEM 1 • SEPARADOR 1",
+                    titulo: "Legajo Legal y Prevención ART (Contrato N° 900415)",
+                    recorrido: "Certificado de cobertura mensual, nómina declarada, Cláusula de No Repetición, altas ARCA, asignación HyS/Medicina Laboral y afiche ART exhibido.",
+                    status: "obs",
+                    hallazgo: "Acuse NTEAR del 20/11/2026 registra Contrato 900415, CIIU Rev2 711322 y Establecimiento 1 'San lorenzo 33, (9105), Angostura, Chubut' (vs. 00027 / 492150 / Gaiman en borradores previos).",
+                    accion: "Unificar legajo legal y constancias con los datos del acuse NTEAR del 20/11/2026."
+                },
+                {
+                    id: "vis-2",
+                    codigo: "ÍTEM 2 • SEPARADOR 2",
+                    titulo: "Declaraciones Juradas SRT (RGRL / NTEAR 20/11/2026)",
+                    recorrido: "Vigencia de RGRL (Res. 463/09), NTEAR recibida el 20/11/2026 (Res. SRT 13/2018 arts. 4 y 5; Res. SRT 81/2019 Anexo III) con 0 expuestos y control de duplicados/fechas.",
+                    status: "obs",
+                    hallazgo: "GERMAN JONATHAN SEBASTIAN (CUIL 20333454271, CIUO 8323, ingreso 07/01/2026) aparece duplicado en la nómina NTEAR (11 registros). También se observan diferencias en fechas de ingreso (Rocha 12/01/2026; Ñancuan 01/05/2025) y CIUO 8323 / 5131.",
+                    accion: "Conciliar duplicado de CUIL 20333454271 ante Prevención ART y revisar fechas de ingreso/CIUO."
+                },
+                {
+                    id: "vis-3",
+                    codigo: "ÍTEM 3 • SEPARADOR 3 Y 8",
+                    titulo: "Base Operativa y Predio San Lorenzo 33",
+                    recorrido: "Orden y limpieza, circulación peatonal/vehicular (IRAM 10005), ausencia de taller/fosa/lavadero propio, tableros con disyuntor, iluminación y agua potable.",
+                    status: "ok",
+                    hallazgo: "Predio de guarda e iluminación operativos; sin tareas de taller ni lavado propio.",
+                    accion: "Sostener orden diario y control de circulación."
+                },
+                {
+                    id: "vis-4",
+                    codigo: "ÍTEM 4 • SEPARADOR 5",
+                    titulo: "Puesta a Tierra (Res. 900/15), Iluminación, Ruido, Ergonomía y Agua",
+                    recorrido: "Protocolo anual de PAT con telurímetro, medición de iluminación (Res. 84/12), ruido en cabina (Res. 85/12), ergonomía (Res. 886/15) y agua potable.",
+                    status: "obs",
+                    hallazgo: "Protocolo de medición anual de Puesta a Tierra (Res. SRT 900/15) pendiente de re-certificación.",
+                    accion: "Programar medición con telurímetro y encomienda antes del 20/12/2026."
+                },
+                {
+                    id: "vis-5",
+                    codigo: "ÍTEM 5 • SEPARADOR 6",
+                    titulo: "Control de Flota (Internos 01 al 10) y Check-List Pre-Viaje",
+                    recorrido: "Planillas Check-List pre-viaje (PTS-03), RTO/VTV vigentes, LiNTI de choferes, matafuegos (2,5 kg o superior), botiquines, balizas, cinturones y 4 martillos rompe-cristales por unidad.",
+                    status: "obs",
+                    hallazgo: "Interno 03: falta reponer 1 martillo rompe-cristales. Interno 07: desgaste parcial en cinta antideslizante de estribo.",
+                    accion: "Reponer martillo en Interno 03 y reemplazar cinta antideslizante en Interno 07."
+                },
+                {
+                    id: "vis-6",
+                    codigo: "ÍTEM 6 • SEPARADOR 7",
+                    titulo: "Protección Contra Incendios, Emergencias y Siniestralidad",
+                    recorrido: "Extintores ABC fijos (5/10 kg) y móviles con manómetro en verde y tarjeta vigente, croquis y Punto de Encuentro Seguro, teléfonos útiles (ART 0800-444-4278) y simulacro anual.",
+                    status: "obs",
+                    hallazgo: "Plan de evacuación y teléfonos visibles; pendiente ejecución y acta de simulacro anual de evacuación.",
+                    accion: "Ejecutar simulacro de evacuación y labrar acta (plazo 30/01/2027)."
+                },
+                {
+                    id: "vis-7",
+                    codigo: "ÍTEM 7 • SEPARADOR 4",
+                    titulo: "Capacitaciones del Programa Anual y Entrega de EPP (Res. 299/11)",
+                    recorrido: "Cronograma anual de 12 módulos, planillas de asistencia firmadas y constancias Anexo I Res. 299/11 con certificaciones IRAM.",
+                    status: "ok",
+                    hallazgo: "Constancias de EPP y capacitaciones mensuales registradas en carpeta.",
+                    accion: "Archivar asistencia de la capacitación del mes."
+                },
+                {
+                    id: "vis-8",
+                    codigo: "ÍTEM 8 • SEPARADOR 8",
+                    titulo: "Control de Tercerizados (Talleres Mecánicos y Lavaderos)",
+                    recorrido: "Legajo de talleres y lavaderos externos habilitados con constancia ARCA, certificado ART o AP y Cláusula de No Repetición a favor de Transporte Virgen del Valle S.A.S.",
+                    status: "ok",
+                    hallazgo: "Política de tercerización aplicada; verificar vigencia documental de cada taller/lavadero previo al ingreso.",
+                    accion: "Bloquear intervención de prestadores sin cláusula vigente."
+                }
+            ]
+        };
+
+        const INITIAL_FLEET = [
+            { interno: "01", marcaModelo: "Mercedes-Benz / Metalpar", dominio: "AA123BB", servicio: "Escolar / Pasajeros", asientos: 33, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Cabina, cinturones, botiquín y 4 martillos OK." },
+            { interno: "02", marcaModelo: "Mercedes-Benz / Metalpar", dominio: "AA234CC", servicio: "Escolar / Pasajeros", asientos: 33, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Butaca neumática, climatización y salidas OK." },
+            { interno: "03", marcaModelo: "Mercedes-Benz / Metalpar", dominio: "AB345DD", servicio: "Escolar / Pasajeros", asientos: 33, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "obs", note: "Falta reposición de 1 martillo rompe-cristales en ventanilla." },
+            { interno: "04", marcaModelo: "Iveco / Busscar", dominio: "AB456EE", servicio: "Interurbano / Pasajeros", asientos: 45, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Insonorización y control satelital/GPS auditados." },
+            { interno: "05", marcaModelo: "Iveco / Busscar", dominio: "AC567FF", servicio: "Interurbano / Pasajeros", asientos: 45, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Butaca de chofer y botiquín verificados." },
+            { interno: "06", marcaModelo: "Scania / Marcopolo", dominio: "AD678GG", servicio: "Interurbano / Pasajeros", asientos: 50, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Matafuego 2,5 kg y cinturones de 50 plazas OK." },
+            { interno: "07", marcaModelo: "Scania / Marcopolo", dominio: "AD789HH", servicio: "Turismo / Contratados", asientos: 50, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "obs", note: "Cinta antideslizante de escalón de acceso con desgaste parcial." },
+            { interno: "08", marcaModelo: "Agrale / Saldivia", dominio: "AE890II", servicio: "Contratados / Especiales", asientos: 24, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Unidad 24 plazas, botiquín y EPP de chofer OK." },
+            { interno: "09", marcaModelo: "Mercedes-Benz / Nuovobus", dominio: "AF901JJ", servicio: "Escolar / Refuerzo", asientos: 33, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Climatización, extintor ABC y botiquín en norma." },
+            { interno: "10", marcaModelo: "Scania / Marcopolo", dominio: "AF012KK", servicio: "Turismo / Contratados", asientos: 50, rto: "Vigente", matafuego: "Vigente", botiquin: "Completo", linti: "Vigente", status: "ok", note: "Telemetría, cinturones y climatización verificados." }
+        ];
+
+        /**
+         * Nómina literal de 11 filas conforme al acuse NTEAR recibido por Prevención ART el 20/11/2026
+         * (Contrato 900415, 0 expuestos, Res. SRT 81/2019 Anexo III).
+         * Se marca en ROJO el duplicado de GERMAN JONATHAN SEBASTIAN (CUIL 20333454271).
+         */
+        const INITIAL_STAFF = [
+            { id: "ntear-01", nombre: "CANDIA BRIAN AMERICO", cuil: "20353836529", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "16/10/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-02", nombre: "CANDIA OCTAVIO JULIO", cuil: "20200946880", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "01/03/2025", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-03", nombre: "GERMAN JONATHAN SEBASTIAN", cuil: "20333454271", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "07/01/2026", esop: "Sin agentes de riesgo — Fila 1/2", verified: false, duplicateAlert: true },
+            { id: "ntear-04", nombre: "GERMAN JONATHAN SEBASTIAN", cuil: "20333454271", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "07/01/2026", esop: "Sin agentes de riesgo — DUPLICADO 2/2", verified: false, duplicateAlert: true },
+            { id: "ntear-05", nombre: "IGNES MARCELO LEONARDO", cuil: "20200974361", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "02/03/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-06", nombre: "MELLA GLENDA MARIBEL", cuil: "27353816263", ciuo: "5131", puesto: "Niñeras y celadoras infantiles", ingreso: "02/03/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-07", nombre: "MORAGA CAMILA SALOME", cuil: "23418618124", ciuo: "5131", puesto: "Niñeras y celadoras infantiles", ingreso: "02/03/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-08", nombre: "ÑANCUAN YULIANA SOLEDAD", cuil: "27424474369", ciuo: "5131", puesto: "Niñeras y celadoras infantiles", ingreso: "01/05/2025", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-09", nombre: "ROCHA SERGIO GUSTAVO", cuil: "20201991243", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "12/01/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-10", nombre: "THOMAS MARCOS DAVID", cuil: "20226157272", ciuo: "8323", puesto: "Conductor de autobuses y tranvías", ingreso: "01/08/2026", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false },
+            { id: "ntear-11", nombre: "VALDEBENITO NAZARENA", cuil: "27408718983", ciuo: "5131", puesto: "Niñeras y celadoras infantiles", ingreso: "01/05/2025", esop: "Sin agentes de riesgo (0 exp.)", verified: true, duplicateAlert: false }
+        ];
+
+        function buildDefaultState() {
+            return {
+                controls: INITIAL_CONTROLS.map(item => ({ ...item })),
+                visit: {
+                    ...INITIAL_VISIT,
+                    items: INITIAL_VISIT.items.map(i => ({ ...i }))
+                },
+                fleet: INITIAL_FLEET.map(u => ({ ...u })),
+                staff: INITIAL_STAFF.map(s => ({ ...s }))
+            };
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return buildDefaultState();
+                const parsed = JSON.parse(raw);
+                const def = buildDefaultState();
+                return {
+                    controls: Array.isArray(parsed.controls) && parsed.controls.length > 0 ? parsed.controls : def.controls,
+                    visit: parsed.visit && Array.isArray(parsed.visit.items)
+                        ? { ...def.visit, ...parsed.visit, items: parsed.visit.items }
+                        : def.visit,
+                    fleet: Array.isArray(parsed.fleet) && parsed.fleet.length > 0 ? parsed.fleet : def.fleet,
+                    staff: Array.isArray(parsed.staff) && parsed.staff.length > 0 ? parsed.staff : def.staff
+                };
+            } catch (_e) {
+                return buildDefaultState();
+            }
+        }
+
+        let appState = loadState();
+        let controls = appState.controls;
+        let visitData = appState.visit;
+        let fleetData = appState.fleet;
+        let staffData = appState.staff;
+
+        let isEditorMode = checkSavedEditorSession();
+        let activeModule = "controles";
+        let activeStatusFilter = "all";
+        let activeScopeFilter = "all";
+        let searchQuery = "";
+        let lastUpdatedAt = new Date().toLocaleDateString("es-AR");
+
+        function checkSavedEditorSession() {
+            try {
+                return sessionStorage.getItem(EDITOR_SESSION_KEY) === "true";
+            } catch (_e) {
+                return false;
+            }
+        }
+
+        function setEditorSession(unlocked) {
+            isEditorMode = Boolean(unlocked);
+            try {
+                if (isEditorMode) {
+                    sessionStorage.setItem(EDITOR_SESSION_KEY, "true");
+                } else {
+                    sessionStorage.removeItem(EDITOR_SESSION_KEY);
+                }
+            } catch (_e) {
+                // Ignorar restricción de almacenamiento
+            }
+        }
+
+        function saveControls() {
+            lastUpdatedAt = new Date().toLocaleDateString("es-AR");
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    controls,
+                    visit: visitData,
+                    fleet: fleetData,
+                    staff: staffData
+                }));
+            } catch (_e) {
+                // Ignorar si el almacenamiento está bloqueado
+            }
+        }
+
+        function isItemOverdue(item) {
+            if (!item.dueDate) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const parts = item.dueDate.split("-");
+            if (parts.length !== 3) return false;
+            const due = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+            return due < today;
+        }
+
+        /**
+         * Un control se considera NO AL DÍA (y por ende en ROJO) si está marcado
+         * como no al día (`!item.isUpToDate`) o si tiene fecha de vencimiento pasada.
+         */
+        function isItemRedAlert(item) {
+            return !item.isUpToDate || isItemOverdue(item);
+        }
+
+        function toggleControlStatus(id) {
+            if (!isEditorMode) return;
+            controls = controls.map(item => {
+                if (item.id !== id) return item;
+                return {
+                    ...item,
+                    isUpToDate: !item.isUpToDate
+                };
+            });
+            saveControls();
+            renderAll();
+        }
+
+        function deleteControl(id) {
+            if (!isEditorMode) return;
+            controls = controls.filter(item => item.id !== id);
+            saveControls();
+            renderAll();
+        }
+
+        function openControlModal(item = null) {
+            if (!isEditorMode) return;
+            const modal = document.getElementById("control-modal");
+            document.getElementById("control-modal-title").textContent = item
+                ? "Editar Control Normativo"
+                : "Nuevo Control Normativo";
+
+            document.getElementById("edit-control-id").value = item ? item.id : "";
+            document.getElementById("field-scope").value = item ? item.scope : "chubut-sat";
+            document.getElementById("field-scope-label").value = item ? item.scopeLabel : "Chubut • Ley I-Nº 140";
+            document.getElementById("field-law").value = item ? item.law : "";
+            document.getElementById("field-title").value = item ? item.title : "";
+            document.getElementById("field-detail").value = item ? item.detail : "";
+            document.getElementById("field-responsible").value = item ? item.responsible : "Lic. Macarena Schischke";
+            document.getElementById("field-frequency").value = item ? item.frequency : "Mensual";
+            document.getElementById("field-due-date").value = item ? (item.dueDate || "") : "";
+            document.getElementById("field-observation").value = item ? (item.observation || "") : "";
+            document.getElementById("field-is-ok").checked = item ? Boolean(item.isUpToDate) : false;
+
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeControlModal() {
+            const modal = document.getElementById("control-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function openPinModal() {
+            const modal = document.getElementById("pin-modal");
+            const input = document.getElementById("pin-input");
+            const err = document.getElementById("pin-error");
+            err.classList.add("hidden");
+            input.value = "";
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function closePinModal() {
+            const modal = document.getElementById("pin-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function applyModuleTabsUI() {
+            const moduleIds = ["controles", "visita", "base"];
+            moduleIds.forEach(mod => {
+                const sectionEl = document.getElementById(`module-${mod}`);
+                const btnEl = document.getElementById(`tab-${mod}`);
+                const isSelected = activeModule === mod;
+
+                if (sectionEl) {
+                    sectionEl.classList.toggle("hidden", !isSelected);
+                }
+                if (btnEl) {
+                    btnEl.className = isSelected
+                        ? "module-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold transition cursor-pointer flex items-center gap-2 bg-pastel-peach text-pastel-peachDeep border border-amber-300 shadow-sm"
+                        : "module-tab-btn px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition cursor-pointer flex items-center gap-2 bg-white/90 text-pastel-ink border border-slate-300 hover:bg-pastel-sky";
+                }
+            });
+
+            const controlsRed = controls.filter(c => isItemRedAlert(c)).length;
+            const visitRed = visitData.items.filter(i => i.status === "obs").length;
+            const fleetRed = fleetData.filter(u => u.status === "obs").length;
+
+            const bControles = document.getElementById("badge-tab-controles");
+            const bVisita = document.getElementById("badge-tab-visita");
+            const bBase = document.getElementById("badge-tab-base");
+
+            if (bControles) {
+                bControles.textContent = controlsRed > 0 ? `${controlsRed} rojo` : "OK";
+                bControles.className = controlsRed > 0
+                    ? "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white"
+                    : "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white";
+            }
+            if (bVisita) {
+                bVisita.textContent = visitRed > 0 ? `${visitRed} obs` : "OK";
+                bVisita.className = visitRed > 0
+                    ? "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white"
+                    : "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white";
+            }
+            if (bBase) {
+                bBase.textContent = fleetRed > 0 ? `${fleetRed} rojo` : "10 OK";
+                bBase.className = fleetRed > 0
+                    ? "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-red-600 text-white"
+                    : "px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white";
+            }
+        }
+
+        function applyModeUI() {
+            const badge = document.getElementById("mode-badge");
+            const switchBtn = document.getElementById("btn-switch-mode");
+            const switchIcon = document.getElementById("btn-switch-icon");
+            const switchLabel = document.getElementById("btn-switch-label");
+            const newControlBtn = document.getElementById("btn-new-control");
+            const resetFullBtn = document.getElementById("btn-reset-full-demo");
+            const backupBtn = document.getElementById("btn-backup-panel");
+            const backupDrawer = document.getElementById("backup-drawer");
+            const saveVisitBtn = document.getElementById("btn-save-visit");
+            const heroHeading = document.getElementById("hero-heading");
+            const heroSubtitle = document.getElementById("hero-subtitle");
+
+            document.querySelectorAll(".visit-meta-input").forEach(el => {
+                el.readOnly = !isEditorMode;
+                if (!isEditorMode) {
+                    el.classList.add("bg-pastel-sand", "cursor-default");
+                } else {
+                    el.classList.remove("bg-pastel-sand", "cursor-default");
+                }
+            });
+
+            if (isEditorMode) {
+                badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-pastel-sage text-pastel-sageDeep border border-emerald-400";
+                badge.textContent = "Modo Consultora (Edición Activa)";
+
+                switchBtn.className = "px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-pastel-ink border border-slate-300 text-xs font-extrabold transition flex items-center gap-2 cursor-pointer";
+                switchIcon.className = "fa-solid fa-lock-open";
+                switchLabel.textContent = "Bloquear / Vista Cliente";
+
+                newControlBtn.classList.remove("hidden");
+                newControlBtn.classList.add("flex");
+
+                resetFullBtn.classList.remove("hidden");
+                resetFullBtn.classList.add("flex");
+
+                backupBtn.classList.remove("hidden");
+                backupBtn.classList.add("flex");
+
+                if (saveVisitBtn) saveVisitBtn.classList.remove("hidden");
+
+                heroHeading.textContent = "Gestión y Actualización de Controles — Transporte Virgen del Valle";
+                heroSubtitle.innerHTML = 'Modo edición privado de la consultora: actualizá controles, check-list de visita mensual, flota (Internos 01 al 10) y legajos; todo lo no al día u observado figura en <strong class="text-red-700 underline decoration-red-500">ROJO</strong>.';
+            } else {
+                badge.className = "px-2.5 py-0.5 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-pastel-sky text-pastel-skyDeep border border-sky-300";
+                badge.textContent = "Vista Cliente — Virgen del Valle (Solo Lectura)";
+
+                switchBtn.className = "px-3.5 py-2 rounded-xl bg-pastel-lavender hover:bg-purple-100 text-pastel-lavenderDeep border border-purple-300 text-xs font-extrabold transition flex items-center gap-2 cursor-pointer shadow-sm";
+                switchIcon.className = "fa-solid fa-lock";
+                switchLabel.textContent = "Acceso Consultora (PIN)";
+
+                newControlBtn.classList.add("hidden");
+                newControlBtn.classList.remove("flex");
+
+                resetFullBtn.classList.add("hidden");
+                resetFullBtn.classList.remove("flex");
+
+                backupBtn.classList.add("hidden");
+                backupBtn.classList.remove("flex");
+                backupDrawer.classList.add("hidden");
+
+                if (saveVisitBtn) saveVisitBtn.classList.add("hidden");
+
+                heroHeading.textContent = "Estado de Situación Normativa — Transporte Virgen del Valle";
+                heroSubtitle.innerHTML = 'Tablero de seguimiento para la empresa: muestra el porcentaje de cumplimiento calculado, el check-list de visita mensual, la base operativa y flota (Internos 01 al 10), y los puntos en <strong class="text-red-700 underline decoration-red-500">ROJO</strong>.';
+            }
+        }
+
+        function updateKPIsAndBreakdown() {
+            const total = controls.length;
+            const redCount = controls.filter(c => isItemRedAlert(c)).length;
+            const greenCount = Math.max(0, total - redCount);
+            const pct = total > 0 ? Math.round((greenCount / total) * 100) : 0;
+
+            let healthText = "Crítico — Atención Inmediata";
+            if (pct === 100) healthText = "Óptimo — 100% Al Día";
+            else if (pct >= 70) healthText = "Moderado — Con Pendientes en Rojo";
+            else if (pct >= 40) healthText = "Bajo — Regularización Prioritaria";
+
+            document.getElementById("kpi-compliance").textContent = `${pct}%`;
+            document.getElementById("kpi-health-label").textContent = healthText;
+            document.getElementById("stat-red").textContent = redCount;
+            document.getElementById("stat-green").textContent = greenCount;
+            document.getElementById("stat-total").textContent = total;
+            document.getElementById("kpi-last-update").textContent = `Actualizado: ${lastUpdatedAt}`;
+
+            document.getElementById("count-all").textContent = total;
+            document.getElementById("count-red").textContent = redCount;
+            document.getElementById("count-green").textContent = greenCount;
+
+            const banner = document.getElementById("global-alert-banner");
+            const bannerTitle = document.getElementById("alert-banner-title");
+            const bannerDesc = document.getElementById("alert-banner-desc");
+            const pill = document.getElementById("health-score-pill");
+            const bar = document.getElementById("health-progress-bar");
+            const iconBox = document.getElementById("alert-icon-box");
+
+            pill.textContent = `${pct}%`;
+            bar.style.width = `${pct}%`;
+
+            if (redCount > 0) {
+                banner.className = "bg-red-100 border-2 border-red-600 text-red-950 rounded-2xl p-4 sm:p-5 shadow-md max-w-md w-full";
+                iconBox.className = "w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 text-lg font-bold";
+                iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                pill.className = "px-2.5 py-1 rounded-lg bg-red-600 text-white font-heading font-extrabold text-sm shrink-0";
+                bar.className = "h-full bg-red-600 transition-all duration-300";
+                bannerTitle.textContent = `${redCount} ${redCount === 1 ? "control en ROJO" : "controles en ROJO"} (No al día o vencido)`;
+                bannerDesc.textContent = "Estos requisitos figuran destacados en rojo por no estar al día o haber superado su fecha de revisión.";
+            } else {
+                banner.className = "bg-pastel-sage border-2 border-emerald-500 text-emerald-950 rounded-2xl p-4 sm:p-5 shadow-md max-w-md w-full";
+                iconBox.className = "w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 text-lg font-bold";
+                iconBox.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+                pill.className = "px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-heading font-extrabold text-sm shrink-0";
+                bar.className = "h-full bg-emerald-600 transition-all duration-300";
+                bannerTitle.textContent = "Todos los controles cargados están AL DÍA";
+                bannerDesc.textContent = "No hay alertas rojas ni vencimientos registrados en el tablero actual.";
+            }
+
+            // Desglose por categoría
+            const breakdownContainer = document.getElementById("category-breakdown");
+            const scopes = ["chubut-sat", "vial-nacional", "hys-srt"];
+            breakdownContainer.innerHTML = scopes.map(scopeKey => {
+                const meta = SCOPE_META[scopeKey];
+                const items = controls.filter(c => c.scope === scopeKey);
+                const scopeTotal = items.length;
+                const scopeRed = items.filter(c => isItemRedAlert(c)).length;
+                const scopeOk = Math.max(0, scopeTotal - scopeRed);
+                const scopePct = scopeTotal > 0 ? Math.round((scopeOk / scopeTotal) * 100) : 100;
+                const hasRed = scopeRed > 0;
+
+                return `
+                    <div class="rounded-2xl p-4 border shadow-sm ${hasRed ? "bg-red-100 border-2 border-red-500" : "bg-white/90 border-slate-200"}">
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <span class="font-heading font-extrabold text-xs sm:text-sm ${hasRed ? "text-red-950" : "text-pastel-ink"}">${meta.title}</span>
+                            <span class="px-2 py-0.5 rounded-md text-xs font-extrabold ${hasRed ? "bg-red-600 text-white" : "bg-emerald-600 text-white"}">${scopePct}%</span>
+                        </div>
+                        <p class="text-[11px] ${hasRed ? "text-red-900" : "text-pastel-muted"} mb-2.5">${meta.lawsShort}</p>
+                        <div class="flex items-center justify-between text-xs font-bold">
+                            <span class="${hasRed ? "text-red-700" : "text-emerald-700"}">
+                                <i class="fa-solid ${hasRed ? "fa-circle-xmark" : "fa-circle-check"} mr-1"></i>
+                                ${hasRed ? `${scopeRed} en rojo` : "Sin alertas"}
+                            </span>
+                            <span class="${hasRed ? "text-red-900" : "text-pastel-muted"}">${scopeOk}/${scopeTotal} al día</span>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function renderCards() {
+            const grid = document.getElementById("cards-grid");
+            const emptyState = document.getElementById("empty-state");
+            const q = searchQuery.trim().toLowerCase();
+
+            const filtered = controls.filter(item => {
+                const red = isItemRedAlert(item);
+                if (activeStatusFilter === "red" && !red) return false;
+                if (activeStatusFilter === "green" && red) return false;
+                if (activeScopeFilter !== "all" && item.scope !== activeScopeFilter) return false;
+
+                if (q) {
+                    const blob = `${item.title} ${item.law} ${item.detail} ${item.scopeLabel} ${item.responsible} ${item.observation}`.toLowerCase();
+                    if (!blob.includes(q)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+
+            grid.innerHTML = filtered.map(item => {
+                const overdue = isItemOverdue(item);
+                const isRed = !item.isUpToDate || overdue;
+
+                const cardClass = isRed
+                    ? "control-card-alert border-2 rounded-2xl p-6 flex flex-col justify-between transition shadow-md"
+                    : "control-card-ok border-2 rounded-2xl p-6 flex flex-col justify-between transition shadow-sm";
+
+                const statusBadgeClass = isRed
+                    ? "bg-red-600 text-white border border-red-700 shadow-sm"
+                    : "bg-pastel-sage text-pastel-sageDeep border border-emerald-400";
+
+                let badgeText = '<i class="fa-solid fa-circle-check mr-1.5"></i>AL DÍA';
+                if (!item.isUpToDate && overdue) {
+                    badgeText = '<i class="fa-solid fa-circle-exclamation mr-1.5"></i>NO AL DÍA / VENCIDO';
+                } else if (!item.isUpToDate) {
+                    badgeText = '<i class="fa-solid fa-circle-exclamation mr-1.5"></i>NO AL DÍA';
+                } else if (overdue) {
+                    badgeText = '<i class="fa-solid fa-clock mr-1.5"></i>VENCIDO (REVISAR)';
+                }
+
+                const obsHtml = item.observation
+                    ? `<div class="mt-3.5 p-3 rounded-xl text-xs leading-relaxed ${isRed ? "bg-red-200/85 border border-red-500 text-red-950 font-semibold" : "bg-pastel-cream border border-slate-200 text-slate-700"}">
+                           <strong class="font-bold"><i class="fa-solid fa-comment-dots mr-1"></i>Observación:</strong> ${escapeHtml(item.observation)}
+                       </div>`
+                    : "";
+
+                const dueHtml = item.dueDate
+                    ? `<span class="${overdue ? "text-red-700 font-extrabold" : ""}"><i class="fa-regular fa-calendar mr-1"></i>Venc./Rev.: ${escapeHtml(item.dueDate)}</span>`
+                    : "";
+
+                const editorActionsHtml = isEditorMode
+                    ? `<div class="mt-4 pt-3 border-t ${isRed ? "border-red-300" : "border-slate-100"} flex flex-wrap items-center gap-2 no-print">
+                           <button type="button" data-action="toggle" data-id="${item.id}" class="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-1.5 ${isRed ? "bg-red-600 hover:bg-red-700 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"}">
+                               <i class="fa-solid ${item.isUpToDate ? "fa-rotate" : "fa-check"}"></i>
+                               <span>${item.isUpToDate ? "Pasar a Rojo" : "Marcar Al Día"}</span>
+                           </button>
+                           <button type="button" data-action="edit" data-id="${item.id}" class="py-2 px-3 rounded-xl bg-pastel-sky hover:bg-sky-100 text-pastel-skyDeep border border-sky-300 text-xs font-bold transition cursor-pointer" title="Editar control">
+                               <i class="fa-solid fa-pen"></i>
+                           </button>
+                           <button type="button" data-action="delete" data-id="${item.id}" class="py-2 px-3 rounded-xl bg-white hover:bg-red-50 text-red-700 border border-red-300 text-xs font-bold transition cursor-pointer" title="Eliminar control">
+                               <i class="fa-solid fa-trash"></i>
+                           </button>
+                       </div>`
+                    : "";
+
+                return `
+                    <article class="${cardClass}">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3.5">
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-pastel-lavender text-pastel-lavenderDeep border border-purple-200">
+                                    ${escapeHtml(item.scopeLabel)}
+                                </span>
+                                <span class="px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide ${statusBadgeClass}">
+                                    ${badgeText}
+                                </span>
+                            </div>
+
+                            <p class="text-xs font-bold ${isRed ? "text-red-700" : "text-pastel-skyDeep"} mb-1.5 leading-snug">
+                                ${escapeHtml(item.law)}
+                            </p>
+                            <h3 class="font-heading text-lg font-extrabold ${isRed ? "text-red-950" : "text-pastel-ink"} leading-snug mb-2">
+                                ${escapeHtml(item.title)}
+                            </h3>
+                            <p class="text-xs sm:text-sm ${isRed ? "text-red-900" : "text-pastel-muted"} leading-relaxed">
+                                ${escapeHtml(item.detail)}
+                            </p>
+                            ${obsHtml}
+                        </div>
+
+                        <div class="pt-4 mt-4 border-t ${isRed ? "border-red-300" : "border-slate-100"}">
+                            <div class="flex flex-wrap items-center justify-between text-[11px] ${isRed ? "text-red-900 font-semibold" : "text-pastel-muted"} gap-2">
+                                <span><i class="fa-solid fa-user-check mr-1"></i>${escapeHtml(item.responsible)}</span>
+                                <span><i class="fa-regular fa-clock mr-1"></i>${escapeHtml(item.frequency)}</span>
+                                ${dueHtml}
+                            </div>
+                            ${editorActionsHtml}
+                        </div>
+                    </article>
+                `;
+            }).join("");
+
+            if (isEditorMode) {
+                grid.querySelectorAll("button[data-action]").forEach(btn => {
+                    const action = btn.getAttribute("data-action");
+                    const id = btn.getAttribute("data-id");
+                    btn.addEventListener("click", (e) => {
+                        e.stopPropagation();
+                        if (action === "toggle") toggleControlStatus(id);
+                        if (action === "edit") {
+                            const found = controls.find(c => c.id === id);
+                            if (found) openControlModal(found);
+                        }
+                        if (action === "delete") deleteControl(id);
+                    });
+                });
+            }
+        }
+
+        function syncVisitMetaInputs() {
+            document.getElementById("visit-acta-nro").value = visitData.actaNro || "";
+            document.getElementById("visit-fecha").value = visitData.fecha || "";
+            document.getElementById("visit-horario").value = visitData.horario || "";
+            document.getElementById("visit-responsable-empresa").value = visitData.responsableEmpresa || "";
+            document.getElementById("visit-profesional").value = visitData.profesional || "";
+            document.getElementById("visit-cap-tema").value = visitData.capacitacionTema || "";
+            document.getElementById("visit-cap-asistentes").value = visitData.capacitacionAsistentes || "";
+            document.getElementById("visit-recomendaciones").value = visitData.recomendaciones || "";
+            document.getElementById("visit-seguimiento").value = visitData.seguimiento || "";
+        }
+
+        function renderVisitChecklist() {
+            syncVisitMetaInputs();
+
+            const total = visitData.items.length;
+            const okCount = visitData.items.filter(i => i.status === "ok").length;
+            const obsCount = visitData.items.filter(i => i.status === "obs").length;
+            const naCount = visitData.items.filter(i => i.status === "na").length;
+
+            document.getElementById("visit-summary-pills").innerHTML = `
+                <div class="rounded-xl p-3 border ${obsCount > 0 ? "bg-red-100 border-2 border-red-600 text-red-950" : "bg-pastel-cream border-slate-200 text-slate-800"}">
+                    <div class="text-[11px] font-bold uppercase ${obsCount > 0 ? "text-red-700" : "text-pastel-muted"}">Observados / Rojo</div>
+                    <div class="font-heading text-2xl font-extrabold ${obsCount > 0 ? "text-red-700" : "text-pastel-ink"}">${obsCount}</div>
+                </div>
+                <div class="rounded-xl p-3 border bg-pastel-sage border-emerald-400 text-emerald-950">
+                    <div class="text-[11px] font-bold uppercase text-pastel-sageDeep">Conformes</div>
+                    <div class="font-heading text-2xl font-extrabold text-pastel-sageDeep">${okCount}</div>
+                </div>
+                <div class="rounded-xl p-3 border bg-pastel-sand border-amber-200 text-slate-800">
+                    <div class="text-[11px] font-bold uppercase text-pastel-muted">No Aplica (N/A)</div>
+                    <div class="font-heading text-2xl font-extrabold text-slate-700">${naCount}</div>
+                </div>
+                <div class="rounded-xl p-3 border bg-pastel-sky border-sky-300 text-pastel-skyDeep">
+                    <div class="text-[11px] font-bold uppercase text-pastel-skyDeep">Puntos del Recorrido</div>
+                    <div class="font-heading text-2xl font-extrabold">${total}</div>
+                </div>
+            `;
+
+            const grid = document.getElementById("visit-checklist-grid");
+            grid.innerHTML = visitData.items.map(item => {
+                const isObs = item.status === "obs";
+                const cardClasses = isObs
+                    ? "control-card-alert border-2 rounded-2xl p-5 flex flex-col justify-between transition"
+                    : item.status === "ok"
+                        ? "bg-white border-2 border-emerald-300 rounded-2xl p-5 flex flex-col justify-between transition"
+                        : "bg-white border-2 border-slate-200 rounded-2xl p-5 flex flex-col justify-between transition";
+
+                const statusPill = isObs
+                    ? `<span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-red-600 text-white"><i class="fa-solid fa-circle-exclamation mr-1"></i>OBSERVADO (ROJO)</span>`
+                    : item.status === "ok"
+                        ? `<span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-pastel-sage text-pastel-sageDeep border border-emerald-400"><i class="fa-solid fa-circle-check mr-1"></i>CONFORME</span>`
+                        : `<span class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-pastel-sand text-slate-700 border border-slate-300">N/A</span>`;
+
+                const statusButtonsHtml = isEditorMode
+                    ? `<div class="flex flex-wrap items-center gap-1.5 no-print">
+                           <button type="button" data-visit-id="${item.id}" data-val="ok" class="visit-status-btn px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold cursor-pointer transition ${item.status === "ok" ? "bg-emerald-600 text-white" : "bg-pastel-sage text-pastel-sageDeep border border-emerald-300 hover:bg-emerald-100"}">
+                               Conforme
+                           </button>
+                           <button type="button" data-visit-id="${item.id}" data-val="obs" class="visit-status-btn px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold cursor-pointer transition ${item.status === "obs" ? "bg-red-600 text-white" : "bg-red-100 text-red-800 border border-red-400 hover:bg-red-200"}">
+                               Observado (Rojo)
+                           </button>
+                           <button type="button" data-visit-id="${item.id}" data-val="na" class="visit-status-btn px-2.5 py-1.5 rounded-lg text-[11px] font-extrabold cursor-pointer transition ${item.status === "na" ? "bg-slate-700 text-white" : "bg-pastel-sand text-slate-700 border border-slate-300 hover:bg-slate-200"}">
+                               N/A
+                           </button>
+                       </div>`
+                    : "";
+
+                return `
+                    <article class="${cardClasses}">
+                        <div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+                                <span class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-pastel-lavender text-pastel-lavenderDeep border border-purple-200">
+                                    ${escapeHtml(item.codigo)}
+                                </span>
+                                ${statusPill}
+                            </div>
+
+                            <h4 class="font-heading text-base font-extrabold ${isObs ? "text-red-950" : "text-pastel-ink"} mb-1.5">
+                                ${escapeHtml(item.titulo)}
+                            </h4>
+                            <p class="text-xs ${isObs ? "text-red-900" : "text-pastel-muted"} leading-relaxed mb-3">
+                                ${escapeHtml(item.recorrido)}
+                            </p>
+
+                            <div class="space-y-2 text-xs">
+                                <div class="p-2.5 rounded-xl ${isObs ? "bg-red-200/85 border border-red-500 text-red-950 font-medium" : "bg-pastel-cream border border-slate-200 text-slate-700"}">
+                                    <span class="font-bold">Hallazgo / Verificación:</span>
+                                    ${isEditorMode
+                                        ? `<input type="text" data-visit-field="hallazgo" data-visit-id="${item.id}" value="${escapeHtml(item.hallazgo)}" class="visit-inline-input mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-900">`
+                                        : `<span> ${escapeHtml(item.hallazgo || "Sin hallazgos asentados.")}</span>`
+                                    }
+                                </div>
+                                <div class="p-2.5 rounded-xl ${isObs ? "bg-red-200/65 border border-red-400 text-red-950" : "bg-pastel-cream border border-slate-200 text-slate-700"}">
+                                    <span class="font-bold">Acción / Plazo:</span>
+                                    ${isEditorMode
+                                        ? `<input type="text" data-visit-field="accion" data-visit-id="${item.id}" value="${escapeHtml(item.accion)}" class="visit-inline-input mt-1 w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs text-slate-900">`
+                                        : `<span> ${escapeHtml(item.accion || "Sin acciones pendientes.")}</span>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        ${isEditorMode ? `<div class="mt-3.5 pt-3 border-t ${isObs ? "border-red-300" : "border-slate-100"}">${statusButtonsHtml}</div>` : ""}
+                    </article>
+                `;
+            }).join("");
+
+            if (isEditorMode) {
+                grid.querySelectorAll(".visit-status-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const id = btn.getAttribute("data-visit-id");
+                        const val = btn.getAttribute("data-val");
+                        visitData.items = visitData.items.map(it => it.id === id ? { ...it, status: val } : it);
+                        saveControls();
+                        renderAll();
+                    });
+                });
+
+                grid.querySelectorAll(".visit-inline-input").forEach(inp => {
+                    inp.addEventListener("input", () => {
+                        const id = inp.getAttribute("data-visit-id");
+                        const field = inp.getAttribute("data-visit-field");
+                        visitData.items = visitData.items.map(it => it.id === id ? { ...it, [field]: inp.value } : it);
+                        saveControls();
+                    });
+                });
+            }
+        }
+
+        function renderBaseAndFleet() {
+            const obsUnits = fleetData.filter(u => u.status === "obs").length;
+            const okUnits = fleetData.length - obsUnits;
+
+            document.getElementById("fleet-summary-counters").innerHTML = `
+                <span class="px-3 py-1 rounded-full ${obsUnits > 0 ? "bg-red-600 text-white" : "bg-pastel-sand text-slate-700"}">
+                    ${obsUnits} en Rojo / Obs.
+                </span>
+                <span class="px-3 py-1 rounded-full bg-pastel-sage text-pastel-sageDeep border border-emerald-400">
+                    ${okUnits}/${fleetData.length} Operativas
+                </span>
+            `;
+
+            document.getElementById("fleet-grid").innerHTML = fleetData.map(unit => {
+                const isRed = unit.status === "obs";
+                return `
+                    <article class="${isRed ? "control-card-alert border-2" : "bg-white border border-slate-200"} rounded-2xl p-4 flex flex-col justify-between transition">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold bg-pastel-sky text-pastel-skyDeep border border-sky-200">
+                                    Int. ${escapeHtml(unit.interno)} • ${escapeHtml(unit.dominio)}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${isRed ? "bg-red-600 text-white" : "bg-pastel-sage text-pastel-sageDeep border border-emerald-300"}">
+                                    ${isRed ? "OBS / ROJO" : "OP. AL DÍA"}
+                                </span>
+                            </div>
+
+                            <h4 class="font-heading font-extrabold text-sm ${isRed ? "text-red-950" : "text-pastel-ink"}">
+                                ${escapeHtml(unit.marcaModelo)}
+                            </h4>
+                            <p class="text-[11px] font-semibold ${isRed ? "text-red-800" : "text-pastel-muted"} mb-2.5">
+                                ${escapeHtml(unit.servicio)} (${escapeHtml(String(unit.asientos))} plazas)
+                            </p>
+
+                            <ul class="text-[11px] space-y-1 ${isRed ? "text-red-950" : "text-slate-700"} border-t ${isRed ? "border-red-300" : "border-slate-100"} pt-2">
+                                <li><strong>RTO/VTV:</strong> ${escapeHtml(unit.rto)}</li>
+                                <li><strong>Matafuego:</strong> ${escapeHtml(unit.matafuego)}</li>
+                                <li><strong>Botiquín:</strong> ${escapeHtml(unit.botiquin)}</li>
+                                <li><strong>LiNTI Chofer:</strong> ${escapeHtml(unit.linti)}</li>
+                            </ul>
+
+                            <p class="mt-2.5 p-2 rounded-lg text-[11px] leading-snug ${isRed ? "bg-red-200/85 border border-red-500 text-red-950 font-semibold" : "bg-pastel-cream text-pastel-muted"}">
+                                ${escapeHtml(unit.note)}
+                            </p>
+                        </div>
+
+                        ${isEditorMode ? `
+                            <div class="mt-3 pt-2.5 border-t ${isRed ? "border-red-200" : "border-slate-100"} flex items-center justify-between gap-2 no-print">
+                                <button type="button" data-fleet-toggle="${escapeHtml(unit.interno)}" class="w-full py-1.5 px-2.5 rounded-xl text-[11px] font-extrabold cursor-pointer transition ${isRed ? "bg-red-600 hover:bg-red-700 text-white" : "bg-emerald-600 hover:bg-emerald-700 text-white"}">
+                                    ${isRed ? "Marcar Operativa" : "Pasar a Rojo / Obs."}
+                                </button>
+                            </div>
+                        ` : ""}
+                    </article>
+                `;
+            }).join("");
+
+            if (isEditorMode) {
+                document.querySelectorAll("button[data-fleet-toggle]").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const interno = btn.getAttribute("data-fleet-toggle");
+                        fleetData = fleetData.map(u => {
+                            if (u.interno !== interno) return u;
+                            const nextRed = u.status !== "obs";
+                            return {
+            // Nómina NTEAR (11 registros / 0 expuestos según acuse del 20/11/2026)
+            const verifiedCount = staffData.filter(s => s.verified && !s.duplicateAlert).length;
+            const dupCount = staffData.filter(s => s.duplicateAlert || !s.verified).length;
+            const staffBadge = document.getElementById("staff-verified-badge");
+            staffBadge.textContent = dupCount > 0
+                ? `${staffData.length} Filas NTEAR • ${dupCount} en Rojo (Duplicado)`
+                : `${verifiedCount}/${staffData.length} Registros NTEAR Conciliados`;
+            staffBadge.className = dupCount > 0
+                ? "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-red-100 text-red-900 border-2 border-red-600"
+                : "px-3 py-1.5 rounded-xl text-xs font-extrabold bg-pastel-sage text-pastel-sageDeep border border-emerald-400";
+
+            document.getElementById("staff-table-body").innerHTML = staffData.map((person, idx) => {
+                const isRed = !person.verified || person.duplicateAlert;
+                return `
+                    <tr class="${isRed ? "bg-red-100 text-red-950 font-semibold" : "hover:bg-pastel-cream"}">
+                        <td class="py-2.5 px-3 font-bold">${idx + 1}</td>
+                        <td class="py-2.5 px-3 font-bold">${escapeHtml(person.nombre)}</td>
+                        <td class="py-2.5 px-3 font-mono text-xs">${escapeHtml(person.cuil)}</td>
+                        <td class="py-2.5 px-3 text-xs"><span class="font-extrabold">CIUO ${escapeHtml(person.ciuo || "")}</span> • ${escapeHtml(person.puesto)}</td>
+                        <td class="py-2.5 px-3 font-mono text-xs">${escapeHtml(person.ingreso || "—")}</td>
+                        <td class="py-2.5 px-3 text-xs">${escapeHtml(person.esop || "Sin agentes de riesgo")}</td>
+                        <td class="py-2.5 px-3">
+                            <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${isRed ? "bg-red-600 text-white" : "bg-pastel-sage text-pastel-sageDeep border border-emerald-300"}">
+                                ${person.duplicateAlert ? "DUPLICADO / ROJO" : (isRed ? "PENDIENTE / ROJO" : "CONCILIADO")}
+                            </span>
+                        </td>
+                        <td class="py-2.5 px-3 text-right no-print">
+                            ${isEditorMode
+                                ? `<button type="button" data-staff-id="${escapeHtml(person.id)}" class="staff-toggle-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold cursor-pointer ${isRed ? "bg-emerald-600 text-white" : "bg-red-100 text-red-800 border border-red-400"}">
+                                       ${isRed ? "Marcar Conciliado" : "Marcar Rojo"}
+                                   </button>`
+                                : `<span class="text-xs text-slate-400">—</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+
+            if (isEditorMode) {
+                document.querySelectorAll(".staff-toggle-btn").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const id = btn.getAttribute("data-staff-id");
+                        staffData = staffData.map(s => {
+                            if (s.id !== id) return s;
+                            const nextVerified = !s.verified;
+                            return {
+                                ...s,
+                                verified: nextVerified,
+                                duplicateAlert: nextVerified ? false : s.duplicateAlert
+                            };
+                        });
+                        saveControls();
+                        renderAll();
+                    });
+                });
+            }
+        }
+
+        function escapeHtml(str) {
+            // Descargar Acta de Visita Mensual en formato texto
+            document.getElementById("btn-export-visit-txt").addEventListener("click", () => {
+                const lines = [
+                    "ACTA DE VISITA MENSUAL DE HIGIENE Y SEGURIDAD (RES. SRT N.º 905/15)",
+                    "Empresa: TRANSPORTE VIRGEN DEL VALLE S.A.S. | CUIT: 30-71810060-3",
+                    "Acuse NTEAR Prevención ART (20/11/2026): Contrato 900415 | CIIU Rev2 711322 | 0 expuestos",
+                    "Establecimiento 1 NTEAR: San lorenzo 33, (9105), Angostura, Chubut",
+                    "Consultora: Lic. Macarena Schischke | Tel: 2804976871 | schischke.macarena@gmail.com",
+                    `Acta N°: ${visitData.actaNro} | Fecha: ${visitData.fecha} | Horario: ${visitData.horario}`,
+                    `Por Empresa: ${visitData.responsableEmpresa} | Servicio HyS: ${visitData.profesional}`,
+                    "------------------------------------------------------------------------",
+                    "VERIFICACIÓN DEL RECORRIDO:"
+                ];
+                visitData.items.forEach(it => {
+                    lines.push(`[${it.status.toUpperCase()}] ${it.codigo} - ${it.titulo}`);
+                    lines.push(`   Hallazgo: ${it.hallazgo}`);
+                    lines.push(`   Acción: ${it.accion}`);
+                });
+                lines.push("------------------------------------------------------------------------");
+                lines.push(`Capacitación: ${visitData.capacitacionTema} (${visitData.capacitacionAsistentes})`);
+                lines.push(`Recomendaciones: ${visitData.recomendaciones}`);
+                lines.push(`Seguimiento: ${visitData.seguimiento}`);
+
+                const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `acta-visita-virgen-del-valle-${visitData.fecha || "mensual"}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        });
+
+        // Cambio de modo Cliente <-> Consultora con PIN
+        document.getElementById("btn-switch-mode").addEventListener("click", () => {
+            if (isEditorMode) {
+                setEditorSession(false);
+                renderAll();
+            } else {
+                openPinModal();
+            }
+        });
+
+        document.getElementById("btn-close-pin").addEventListener("click", closePinModal);
+        document.getElementById("btn-cancel-pin").addEventListener("click", closePinModal);
+
+        document.getElementById("pin-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const entered = document.getElementById("pin-input").value.trim();
+            if (entered === CONSULTANT_PIN) {
+                setEditorSession(true);
+                closePinModal();
+                renderAll();
+            } else {
+                document.getElementById("pin-error").classList.remove("hidden");
+            }
+        });
+
+        // Modal Crear / Editar control
+        document.getElementById("btn-new-control").addEventListener("click", () => openControlModal(null));
+        document.getElementById("btn-close-control-modal").addEventListener("click", closeControlModal);
+        document.getElementById("btn-cancel-control-modal").addEventListener("click", closeControlModal);
+
+        document.getElementById("control-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (!isEditorMode) return;
+
+            const existingId = document.getElementById("edit-control-id").value;
+            const payload = {
+                id: existingId || `ctrl-${Date.now()}`,
+                scope: document.getElementById("field-scope").value,
+                scopeLabel: document.getElementById("field-scope-label").value.trim() || "Control Normativo",
+                law: document.getElementById("field-law").value.trim(),
+                title: document.getElementById("field-title").value.trim(),
+                detail: document.getElementById("field-detail").value.trim(),
+                responsible: document.getElementById("field-responsible").value.trim() || "Lic. Macarena Schischke",
+                frequency: document.getElementById("field-frequency").value.trim() || "Mensual",
+                dueDate: document.getElementById("field-due-date").value,
+                observation: document.getElementById("field-observation").value.trim(),
+                isUpToDate: document.getElementById("field-is-ok").checked
+            };
+
+            if (existingId) {
+                controls = controls.map(c => (c.id === existingId ? payload : c));
+            } else {
+                controls = [payload, ...controls];
+            }
+
+            saveControls();
+            closeControlModal();
+            renderAll();
+        });
+
+        // Guardar acta de visita mensual
+        document.getElementById("btn-save-visit").addEventListener("click", () => {
+            if (!isEditorMode) return;
+            visitData.actaNro = document.getElementById("visit-acta-nro").value.trim();
+            visitData.fecha = document.getElementById("visit-fecha").value;
+            visitData.horario = document.getElementById("visit-horario").value.trim();
+            visitData.responsableEmpresa = document.getElementById("visit-responsable-empresa").value.trim();
+            visitData.profesional = document.getElementById("visit-profesional").value.trim();
+            visitData.capacitacionTema = document.getElementById("visit-cap-tema").value.trim();
+            visitData.capacitacionAsistentes = document.getElementById("visit-cap-asistentes").value.trim();
+            visitData.recomendaciones = document.getElementById("visit-recomendaciones").value.trim();
+            visitData.seguimiento = document.getElementById("visit-seguimiento").value.trim();
+            saveControls();
+            renderAll();
+
+            const statusBox = document.getElementById("visit-save-status");
+            statusBox.textContent = `Acta N° ${visitData.actaNro || "s/n"} guardada correctamente en el sistema.`;
+            statusBox.classList.remove("hidden");
+        });
+
+        // Descargar Acta de Visita Mensual en formato texto
+        document.getElementById("btn-export-visit-txt").addEventListener("click", () => {
+            const lines = [
+                "ACTA DE VISITA MENSUAL DE HIGIENE Y SEGURIDAD (RES. SRT N.º 905/15)",
+                "Empresa: TRANSPORTE VIRGEN DEL VALLE S.A.S. | CUIT: 30-71810060-3",
+                "Domicilio Operativo: San Lorenzo Casa 33, Gaiman, Chubut",
+                "ART: Prevención ART S.A. (Contrato N° 00027)",
+                `Acta N°: ${visitData.actaNro} | Fecha: ${visitData.fecha} | Horario: ${visitData.horario}`,
+                `Por Empresa: ${visitData.responsableEmpresa} | Servicio HyS: ${visitData.profesional}`,
+                "------------------------------------------------------------------------",
+                "VERIFICACIÓN DEL RECORRIDO:"
+            ];
+            visitData.items.forEach(it => {
+                lines.push(`[${it.status.toUpperCase()}] ${it.codigo} - ${it.titulo}`);
+                lines.push(`   Hallazgo: ${it.hallazgo}`);
+                lines.push(`   Acción: ${it.accion}`);
+            });
+            lines.push("------------------------------------------------------------------------");
+            lines.push(`Capacitación: ${visitData.capacitacionTema} (${visitData.capacitacionAsistentes})`);
+            lines.push(`Recomendaciones: ${visitData.recomendaciones}`);
+            lines.push(`Seguimiento: ${visitData.seguimiento}`);
+
+            const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `acta-visita-virgen-del-valle-${visitData.fecha || "mensual"}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Restablecer estado inicial completo desde modo consultora
+        document.getElementById("btn-reset-full-demo").addEventListener("click", () => {
+            if (!isEditorMode) return;
+            const fresh = buildDefaultState();
+            controls = fresh.controls;
+            visitData = fresh.visit;
+            fleetData = fresh.fleet;
+            staffData = fresh.staff;
+            saveControls();
+            renderAll();
+        });
+
+        // Respaldo / Restauración JSON
+        document.getElementById("btn-backup-panel").addEventListener("click", () => {
+            if (!isEditorMode) return;
+            document.getElementById("backup-drawer").classList.toggle("hidden");
+        });
+
+        document.getElementById("btn-close-backup").addEventListener("click", () => {
+            document.getElementById("backup-drawer").classList.add("hidden");
+        });
+
+        document.getElementById("btn-export-json").addEventListener("click", () => {
+            if (!isEditorMode) return;
+            const dataStr = JSON.stringify({
+                empresa: "TRANSPORTE VIRGEN DEL VALLE S.A.S.",
+                cuit: "30-71810060-3",
+                consultora: "Lic. Macarena Schischke (Mat. CO.H.SE.CH.)",
+                exportadoEn: new Date().toISOString(),
+                controles: controls,
+                visit: visitData,
+                fleet: fleetData,
+                staff: staffData
+            }, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `virgen-del-valle-hys-${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById("input-import-json").addEventListener("change", (e) => {
+            if (!isEditorMode) return;
+            const file = e.target.files && e.target.files[0];
+            const feedback = document.getElementById("backup-feedback");
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const parsed = JSON.parse(String(reader.result || ""));
+                    const list = Array.isArray(parsed) ? parsed : parsed.controles;
+                    if (!Array.isArray(list) || list.length === 0) {
+                        throw new Error("Formato inválido");
+                    }
+                    controls = list.map((item, idx) => ({
+                        id: String(item.id || `imported-${Date.now()}-${idx}`),
+                        scope: ["chubut-sat", "vial-nacional", "hys-srt"].includes(item.scope) ? item.scope : "chubut-sat",
+                        scopeLabel: String(item.scopeLabel || "Control Normativo"),
+                        law: String(item.law || ""),
+                        title: String(item.title || ""),
+                        detail: String(item.detail || ""),
+                        responsible: String(item.responsible || "HyS"),
+                        frequency: String(item.frequency || "Mensual"),
+                        dueDate: String(item.dueDate || ""),
+                        observation: String(item.observation || ""),
+                        isUpToDate: Boolean(item.isUpToDate)
+                    }));
+                    if (parsed.visit && Array.isArray(parsed.visit.items)) {
+                        visitData = { ...visitData, ...parsed.visit, items: parsed.visit.items };
+                    }
+                    if (Array.isArray(parsed.fleet) && parsed.fleet.length > 0) {
+                        fleetData = parsed.fleet;
+                    }
+                    if (Array.isArray(parsed.staff) && parsed.staff.length > 0) {
+                        staffData = parsed.staff;
+                    }
+                    saveControls();
+                    renderAll();
+                    feedback.className = "mt-3 text-xs font-bold px-3.5 py-2 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300";
+                    feedback.textContent = "Respaldo JSON importado y guardado correctamente.";
+                    feedback.classList.remove("hidden");
+                } catch (_err) {
+                    feedback.className = "mt-3 text-xs font-bold px-3.5 py-2 rounded-xl bg-red-100 text-red-900 border border-red-300";
+                    feedback.textContent = "No se pudo importar el archivo JSON. Verificá que sea un respaldo válido.";
+                    feedback.classList.remove("hidden");
+                }
+                e.target.value = "";
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById("btn-reset-demo").addEventListener("click", () => {
+            if (!isEditorMode) return;
+            controls = INITIAL_CONTROLS.map(item => ({ ...item }));
+            saveControls();
+            renderAll();
+        });
+
+        // Filtros y búsqueda
+        document.querySelectorAll(".status-filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                activeStatusFilter = btn.getAttribute("data-status");
+                document.querySelectorAll(".status-filter-btn").forEach(b => {
+                    b.classList.remove("ring-2", "ring-offset-1", "ring-navy-900");
+                });
+                btn.classList.add("ring-2", "ring-offset-1", "ring-navy-900");
+                renderCards();
+            });
+        });
+
+        document.getElementById("scope-select").addEventListener("change", (e) => {
+            activeScopeFilter = e.target.value;
+            renderCards();
+        });
+
+        document.getElementById("search-input").addEventListener("input", (e) => {
+            searchQuery = e.target.value;
+            renderCards();
+        });
+
+        document.getElementById("btn-clear-filters").addEventListener("click", () => {
+            activeStatusFilter = "all";
+            activeScopeFilter = "all";
+            searchQuery = "";
+            document.getElementById("scope-select").value = "all";
+            document.getElementById("search-input").value = "";
+            document.querySelectorAll(".status-filter-btn").forEach(b => {
+                b.classList.remove("ring-2", "ring-offset-1", "ring-navy-900");
+            });
+            document.querySelector('.status-filter-btn[data-status="all"]').classList.add("ring-2", "ring-offset-1", "ring-navy-900");
+            renderCards();
+        });
+
+        // Renderizado inicial
+        renderAll();
+    </script>
+</body>
+</html>
